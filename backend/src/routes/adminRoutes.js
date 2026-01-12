@@ -50,7 +50,7 @@ router.post(
 router.post(
     '/register-packet',
     asyncHandler(async (req, res) => {
-        const { packetId } = req.body;
+        const { packetId, registeredNumber } = req.body;
 
         if (!packetId || String(packetId).trim() === '') {
             const err = new Error('Packet ID required');
@@ -58,10 +58,21 @@ router.post(
             throw err;
         }
 
+        if (!registeredNumber || String(registeredNumber).trim() === '') {
+            const err = new Error('Registered Number required');
+            err.statusCode = 400;
+            throw err;
+        }
+
         // Insert new packet with default status 'LOCKED'
         const { error } = await supabase
             .from('packets')
-            .insert([{ packetid: packetId.trim(), status: 'LOCKED', attempts: 0 }]);
+            .insert([{ 
+                packetid: packetId.trim(), 
+                registered_number: registeredNumber.trim(),
+                status: 'LOCKED', 
+                attempts: 0 
+            }]);
 
         if (error) {
             console.error('Supabase register error:', error);

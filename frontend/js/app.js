@@ -62,6 +62,13 @@ async function onVerifyOtp() {
 
 function onRestart() {
   clearStatus();
+
+  const input = $('packetId');
+  if (input) {
+    input.disabled = false;
+    input.value = '';
+  }
+
   renderRequestOtpView();
   wireDynamicButtons();
 }
@@ -81,4 +88,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ensure initial UI is correct even if HTML changes
   renderRequestOtpView();
   wireDynamicButtons();
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const el = document.activeElement;
+      // If the user already focused a button, let the browser handle the click
+      if (el && el.tagName === 'BUTTON') return;
+
+      const requestBtn = $('requestOtp');
+      const verifyBtn = $('verifyOtp');
+      const restartBtn = $('restart');
+
+      if (verifyBtn) {
+        // Prevent default form submission if any, and trigger click
+        e.preventDefault();
+        verifyBtn.click();
+      } else if (requestBtn) {
+        e.preventDefault();
+        requestBtn.click();
+      } else if (restartBtn) {
+        e.preventDefault();
+        restartBtn.click();
+      }
+    }
+  });
 });

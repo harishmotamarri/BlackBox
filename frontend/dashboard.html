@@ -31,6 +31,7 @@
                     <p class="small">Add a new BlackBox Packet ID to the database.</p>
                     <br>
                     <input id="newPacketId" class="input-field" placeholder="New Packet ID" />
+                    <input id="registeredNumber" class="input-field" placeholder="Registered Number" style="margin-top: 10px;" />
                     <div id="regStatus" class="status"></div>
                     <button id="registerBtn" class="btn btn-primary btn-full">Register Packet</button>
                 </div>
@@ -57,10 +58,15 @@
 
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const packetId = document.getElementById('newPacketId').value;
+            const registeredNumber = document.getElementById('registeredNumber').value;
             const statusEl = document.getElementById('regStatus');
             const btn = document.getElementById('registerBtn');
 
-            if (!packetId) return;
+            if (!packetId || !registeredNumber) {
+                statusEl.innerText = 'Please enter both Packet ID and Registered Number';
+                statusEl.style.color = '#ef4444';
+                return;
+            }
 
             statusEl.innerText = 'Registering...';
             statusEl.style.color = '#9ca3af';
@@ -70,7 +76,7 @@
                 const res = await fetch('/api/admin/register-packet', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ packetId })
+                    body: JSON.stringify({ packetId, registeredNumber })
                 });
                 const data = await res.json();
 
@@ -78,6 +84,7 @@
                     statusEl.innerText = 'Packet Registered Successfully!';
                     statusEl.style.color = '#16a34a';
                     document.getElementById('newPacketId').value = '';
+                    document.getElementById('registeredNumber').value = '';
                 } else {
                     const msg = data.error || data.message || 'Registration failed';
                     if (msg.includes('already exists')) {

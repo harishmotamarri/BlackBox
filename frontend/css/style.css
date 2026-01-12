@@ -163,3 +163,24 @@ body {
 .badge-gray {
   color: #9ca3af;
 }
+
+@media (max-width: 768px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 60px;
+  }
+
+  .hero-media {
+    order: -1; /* Show card first on mobile if preferred, or remove this line to keep order */
+    justify-content: center;
+  }
+  
+  .hero {
+    padding: 40px 0;
+  }
+  
+  .nav-inner {
+    flex-direction: row; /* Keep row but maybe adjust padding */
+  }
+}

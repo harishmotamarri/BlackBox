@@ -1,0 +1,13 @@
+{
+    "name": "otp-project",
+    "version": "1.0.0",
+    "description": "Root package to run the full stack application",
+    "scripts": {
+        "start": "cd backend && npm start",
+        "dev": "cd backend && npm run dev",
+        "install-all": "cd backend && npm install"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

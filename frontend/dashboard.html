@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>BlackBox – Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="nav">
+        <div class="container nav-inner">
+            <div class="logo">BlackBox-Admin</div>
+            <button id="logoutBtn" class="admin">Logout</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-inner">
+            <div>
+                <h3 style="color: orange;" id="welcomeMsg">Welcome, Admin</h3>
+                <p class="hero-sub">You have secure access to the system.</p>
+
+                <br>
+
+                <div class="hero-card">
+                    <h4>Register New Packet</h4>
+                    <p class="small">Add a new BlackBox Packet ID to the database.</p>
+                    <br>
+                    <input id="newPacketId" class="input-field" placeholder="New Packet ID" />
+                    <div id="regStatus" class="status"></div>
+                    <button id="registerBtn" class="btn btn-primary btn-full">Register Packet</button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const username = localStorage.getItem('adminUser');
+            if (username) {
+                document.getElementById('welcomeMsg').innerText = `Welcome, ${username}`;
+            } else {
+                // Not logged in? Redirect home
+                window.location.href = '/';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('adminUser');
+            window.location.href = '/';
+        });
+
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const packetId = document.getElementById('newPacketId').value;
+            const statusEl = document.getElementById('regStatus');
+            const btn = document.getElementById('registerBtn');
+
+            if (!packetId) return;
+
+            statusEl.innerText = 'Registering...';
+            statusEl.style.color = '#9ca3af';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/register-packet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    statusEl.innerText = 'Packet Registered Successfully!';
+                    statusEl.style.color = '#16a34a';
+                    document.getElementById('newPacketId').value = '';
+                } else {
+                    const msg = data.error || data.message || 'Registration failed';
+                    if (msg.includes('already exists')) {
+                        // User requested: small and not red
+                        statusEl.innerHTML = `<span style="font-size: 0.8em; color: #9ca3af;">Packet ID already exists.</span>`;
+                        statusEl.style.color = '#9ca3af'; // Ensure container isn't red
+                    } else {
+                        statusEl.innerText = msg;
+                        statusEl.style.color = '#ef4444';
+                    }
+                    throw new Error('handled');
+                }
+            } catch (err) {
+                if (err.message !== 'handled') {
+                    statusEl.innerText = err.message;
+                    statusEl.style.color = '#ef4444';
+                }
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

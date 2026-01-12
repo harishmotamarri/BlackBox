@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>BlackBox – Smart Security Packet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="logo">BlackBox</div>
+      <button class="admin" onclick="window.location.href='admin.html'">Admin Login</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-inner">
+
+      <div>
+        <p class="eyebrow">Lock it • Track it • Own it</p>
+        <h1>Revolutionizing<br>Package Security<br>with IoT</h1>
+        <p class="hero-sub">
+          Secure high-value deliveries using OTP-authenticated IoT locks.
+        </p>
+      </div>
+
+      <div class="hero-media">
+        <div class="hero-card">
+          <h3 id="card-title">Enter Packet ID</h3>
+
+          <label class="small">Packet ID</label>
+          <input id="packetId" class="input-field" />
+
+          <div id="status" class="status"></div>
+
+          <div id="action">
+            <button class="btn btn-primary btn-full" id="requestOtp" type="button">
+              Generate OTP
+            </button>
+
+          </div>
+
+          <p class="small" id="note">
+            Enter the Packet ID printed on your BlackBox.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

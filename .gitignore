@@ -1,0 +1,10 @@
+node_modules/
+backend/node_modules/
+backend/blackbox.db
+*.log
+.DS_Store
+.env
+backend/.env
+frontend/.env
+supabase/
+supabase/.temp/

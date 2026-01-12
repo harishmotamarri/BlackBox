@@ -1,0 +1,165 @@
+:root {
+  --bg: #050816;
+  --card: #020617;
+  --accent: #7069f7;
+  --text: #ffffff;
+  --muted: #9ca3af;
+  --border: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container {
+  width: min(1120px, calc(100% - 40px));
+  margin: auto;
+}
+
+/* Navbar */
+.nav {
+  position: sticky;
+  top: 0;
+  background: rgba(2, 6, 23, 0.95);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.admin {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  /* For anchor tags */
+  display: inline-block;
+  /* For anchor tags */
+  text-align: center;
+}
+
+.admin:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(112, 105, 247, 0.1);
+}
+
+/* Hero */
+.hero {
+  padding: 80px 0;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 40px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: orange;
+}
+
+.hero-sub {
+  color: var(--muted);
+}
+
+/* Card */
+.hero-media {
+  display: flex;
+  justify-content: center;
+}
+
+.hero-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.small {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Inputs */
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+}
+
+.input-error {
+  font-size: 13px;
+  color: #ff6b6b;
+  margin-bottom: 8px;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-unlock {
+  background: #16a34a;
+  color: white;
+  box-shadow: 0 10px 25px rgba(22, 163, 74, 0.45);
+}
+
+/* Status */
+.badge {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.badge-green {
+  color: #16a34a;
+}
+
+.badge-red {
+  color: #ef4444;
+}
+
+.badge-gray {
+  color: #9ca3af;
+}

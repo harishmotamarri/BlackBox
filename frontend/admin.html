@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>BlackBox – Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="css/style.css" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="nav">
+        <div class="container nav-inner">
+            <div class="logo">BlackBox-Admin</div>
+            <a href="/" class="admin">Back to Home</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-inner" style="display: flex; justify-content: center;">
+
+            <div class="hero-media">
+                <div class="hero-card">
+                    <h3 id="card-title" style="color: rgb(255, 255, 255);">Admin Login</h3>
+
+                    <form id="loginForm">
+                        <label class="small">Username</label>
+                        <input id="username" class="input-field" type="text" placeholder="Enter username" />
+
+                        <label class="small">Password</label>
+                        <input id="password" class="input-field" type="password" placeholder="Enter password" />
+
+                        <div id="status" class="status"></div>
+
+                        <div id="action">
+                            <button class="btn btn-primary btn-full" type="submit">
+                                Login
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const statusEl = document.getElementById('status');
+
+            statusEl.innerText = 'Authenticating...';
+            statusEl.style.color = '#9ca3af';
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    localStorage.setItem('adminUser', username);
+                    window.location.href = '/dashboard.html';
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+            } catch (err) {
+                statusEl.innerText = err.message;
+                statusEl.style.color = '#ef4444';
+            }
+        });
+    </script>
+</body>
+
+</html>

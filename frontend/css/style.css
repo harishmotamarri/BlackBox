@@ -172,15 +172,16 @@ body {
   }
 
   .hero-media {
-    order: -1; /* Show card first on mobile if preferred, or remove this line to keep order */
+    /* order: -1; Removed to keep text on top */
     justify-content: center;
   }
-  
+
   .hero {
     padding: 40px 0;
   }
-  
+
   .nav-inner {
-    flex-direction: row; /* Keep row but maybe adjust padding */
+    flex-direction: row;
+    /* Keep row but maybe adjust padding */
   }
 }

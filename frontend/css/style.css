@@ -171,8 +171,13 @@ body {
     gap: 60px;
   }
 
+  /* Force correct order: Text first (1), Card second (2) */
+  .hero-inner>div:first-child {
+    order: 1;
+  }
+
   .hero-media {
-    /* order: -1; Removed to keep text on top */
+    order: 2;
     justify-content: center;
   }
 

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BlackBox – Partner Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="nav">
+        <div class="container nav-inner">
+            <div class="logo">BlackBox-Partner</div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span id="welcomeMsg" style="color: #9ca3af; font-size: 0.9em;"></span>
+                <button class="admin" id="logoutBtn" style="border-color: #ef4444; color: #ef4444;">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2 id="heroGreeting" style="text-align: center; margin-bottom: 2rem;">Logistics Management</h2>
+
+            <div style="display: flex; gap: 1rem; flex-wrap: nowrap; overflow-x: auto; align-items: flex-start;">
+
+                <!-- 1. Assign Delivery -->
+                <div class="hero-card" style="flex: 1; min-width: 300px;">
+                    <h4>Assign Delivery To Packet</h4>
+                    <p class="small">Configure an existing packet for delivery.</p>
+                    <br>
+                    <input id="packetId" class="input-field" placeholder="Packet ID (Available)" />
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <input id="fromLocation" class="input-field" placeholder="From (Wholesale)" />
+                        <input id="toLocation" class="input-field" placeholder="To (Retail)" />
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <input id="batteryStatus" class="input-field" placeholder="Initial Battery (e.g. 100%)"
+                            value="100%" />
+                        <input id="firmwareVersion" class="input-field" placeholder="Firmware (e.g. v1.0)"
+                            value="v1.0.0" />
+                    </div>
+                    <input id="sensorData" class="input-field" placeholder="Initial Sensor Data (JSON)"
+                        value='{"temp": 25, "humidity": 50}' style="margin-top: 10px;" />
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <select id="packetType" class="input-field" style="background: #1f2937; color: white;">
+                            <option value="Standard">Standard</option>
+                            <option value="Fragile">Fragile</option>
+                            <option value="High Value">High Value</option>
+                        </select>
+                        <select id="authType" class="input-field" style="background: #1f2937; color: white;">
+                            <option value="OTP">OTP Based</option>
+                            <option value="QR">QR Based</option>
+                        </select>
+                    </div>
+
+                    <input id="userDetails" class="input-field" placeholder="User Details (Name/Contact)"
+                        style="margin-top: 10px;" />
+
+                    <div id="assignStatus" class="status"></div>
+                    <button id="assignBtn" class="btn btn-primary btn-full">Assign & Activate</button>
+                </div>
+
+                <!-- 2. Track Delivery -->
+                <div class="hero-card" style="flex: 1; min-width: 300px;">
+                    <h4>Track Delivery</h4>
+                    <p class="small">View current delivery status.</p>
+                    <br>
+                    <input id="trackPacketId" class="input-field" placeholder="Packet ID" />
+                    <div id="trackStatus" class="status"></div>
+                    <button id="trackBtn" class="btn btn-primary btn-full"
+                        style="background-color: #3b82f6; border-color: #3b82f6;">Check Status</button>
+
+                    <!-- Limited Status View -->
+                    <div id="trackResult" style="margin-top: 20px; text-align: left; display: none;">
+                        <p class="small" style="color: #9ca3af;">Status: <span id="resStatus"
+                                style="color: white;"></span></p>
+                        <p class="small" style="color: #9ca3af;">Technician Data: <span
+                                style="color: #ef4444;">RESTRICTED</span></p>
+                        <p class="small" style="color: #9ca3af;">Battery: <span id="resBattery"
+                                style="color: white;"></span></p>
+                        <p class="small" style="color: #9ca3af;">Route: <span id="resRoute"
+                                style="color: white;"></span></p>
+                        <p class="small" style="color: #9ca3af;">Transit: <span id="resTransit"
+                                style="color: white;"></span></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = localStorage.getItem('partnerUser');
+            if (user) {
+                document.getElementById('welcomeMsg').innerText = `Partner: ${user}`;
+                // Set Prominent Greeting
+                document.getElementById('heroGreeting').innerText = `Welcome back, ${user}!`;
+            } else {
+                window.location.href = '/ecommerce_login.html';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('partnerUser');
+            window.location.href = '/ecommerce_login.html';
+        });
+
+        // Assign Delivery Logic
+        document.getElementById('assignBtn').addEventListener('click', async () => {
+            const packetId = document.getElementById('packetId').value;
+            const fromLocation = document.getElementById('fromLocation').value;
+            const toLocation = document.getElementById('toLocation').value;
+            const packetType = document.getElementById('packetType').value;
+            const authType = document.getElementById('authType').value;
+            const userDetails = document.getElementById('userDetails').value;
+
+            // New Fields
+            const batteryStatus = document.getElementById('batteryStatus').value;
+            const firmwareVersion = document.getElementById('firmwareVersion').value;
+            const sensorData = document.getElementById('sensorData').value;
+
+            const statusEl = document.getElementById('assignStatus');
+
+            if (!packetId) {
+                statusEl.innerText = 'Packet ID required';
+                statusEl.style.color = '#ef4444';
+                return;
+            }
+
+            statusEl.innerText = 'Assigning...';
+            statusEl.style.color = '#9ca3af';
+
+            try {
+                const res = await fetch('/api/partner/assign-delivery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        packetId,
+                        fromLocation,
+                        toLocation,
+                        packetType,
+                        authType,
+                        userDetails,
+                        batteryStatus,
+                        firmwareVersion,
+                        sensorData
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    statusEl.innerText = 'Delivery Assigned!';
+                    statusEl.style.color = '#16a34a';
+                    // Clear fields
+                    document.getElementById('packetId').value = '';
+                    document.getElementById('userDetails').value = '';
+                } else {
+                    throw new Error(data.message || 'Failed');
+                }
+            } catch (e) {
+                statusEl.innerText = e.message;
+                statusEl.style.color = '#ef4444';
+            }
+        });
+
+        // Track Logic
+        document.getElementById('trackBtn').addEventListener('click', async () => {
+            const packetId = document.getElementById('trackPacketId').value;
+            const statusEl = document.getElementById('trackStatus');
+            const resultDiv = document.getElementById('trackResult');
+
+            if (!packetId) return;
+
+            statusEl.innerText = 'Checking...';
+            resultDiv.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/partner/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.data) {
+                    statusEl.innerText = '';
+                    const d = data.data;
+                    document.getElementById('resStatus').innerText = d.status;
+                    document.getElementById('resBattery').innerText = d.batteryStatus || 'N/A';
+                    document.getElementById('resRoute').innerText = `${d.fromLocation || '?'} -> ${d.toLocation || '?'}`;
+                    document.getElementById('resTransit').innerText = d.inTransit ? 'Yes' : 'No';
+                    resultDiv.style.display = 'block';
+                } else {
+                    throw new Error(data.message || 'Not found');
+                }
+            } catch (e) {
+                statusEl.innerText = e.message;
+                statusEl.style.color = '#ef4444';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -22,7 +22,13 @@ async function onRequestOtp() {
 
   try {
     setStatus('Generating OTP…', 'info');
-    await api.requestOtp(packetId);
+    const res = await api.requestOtp(packetId);
+
+    // Log OTP to console for the user
+    if (res.otp) {
+      console.log(`%c OTP for ${packetId}: ${res.otp} `, 'background: #222; color: #bada55; font-size: 16px; padding: 4px; border-radius: 4px;');
+    }
+
     setStatus('OTP generated.', 'success');
 
     // Disable Packet ID input

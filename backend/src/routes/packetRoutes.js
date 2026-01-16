@@ -62,10 +62,8 @@ router.post(
     const otp = generateOtp();
     const otpHash = hashOtp(otp);
 
-    // DEMO LOGGING (Moved up and using error stream for visibility)
-    console.error('\n**************************************************');
-    console.error(` YOUR OTP for packet "${packetId}": ${otp}`);
-    console.error('**************************************************\n');
+    // DEMO LOGGING: Send to client instead of server console
+    // console.error(...) removed
 
     const expiresAt = Date.now() + OTP_TTL_MS;
 
@@ -73,6 +71,7 @@ router.post(
       .from('packets')
       .update({
         otphash: otpHash,
+        current_otp: otp,
         otpexpiresat: expiresAt,
         attempts: 0
       })
@@ -83,7 +82,8 @@ router.post(
       httpError(500, 'Failed to update packet');
     }
 
-    res.json({ success: true, message: 'OTP generated' });
+    // Send OTP to client for demo purposes
+    res.json({ success: true, message: 'OTP generated', otp });
   })
 );
 
@@ -130,6 +130,8 @@ router.post(
   })
 );
 
+const ADDED_AUTO_LOCK_DELAY_MS = 5 * 60 * 1000; // 5 minutes
+
 // POST /api/packet/unlock
 router.post(
   '/unlock',
@@ -147,6 +149,22 @@ router.post(
       .from('packets')
       .update({ status: 'UNLOCKED' })
       .eq('packetid', packetId);
+
+    // Auto-lock after 5 minutes
+    setTimeout(async () => {
+      console.log(`Auto-locking packet: ${packetId}`);
+      const { error } = await supabase
+        .from('packets')
+        .update({ status: 'LOCKED', attempts: 0 })
+        .eq('packetid', packetId)
+        .eq('status', 'UNLOCKED'); // Only lock if still unlocked
+
+      if (error) {
+        console.error(`Failed to auto-lock packet ${packetId}:`, error);
+      } else {
+        console.log(`Packet ${packetId} locked successfully.`);
+      }
+    }, ADDED_AUTO_LOCK_DELAY_MS);
 
     res.json({ success: true, message: 'Package unlocked' });
   })

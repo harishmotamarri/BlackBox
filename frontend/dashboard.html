@@ -22,18 +22,66 @@
         <div class="container hero-inner">
             <div>
                 <h3 style="color: orange;" id="welcomeMsg">Welcome, Admin</h3>
-                <p class="hero-sub">You have secure access to the system.</p>
+                <p class="hero-sub">You have secure access to this system.</p>
 
                 <br>
 
-                <div class="hero-card">
-                    <h4>Register New Packet</h4>
-                    <p class="small">Add a new BlackBox Packet ID to the database.</p>
-                    <br>
-                    <input id="newPacketId" class="input-field" placeholder="New Packet ID" />
-                    <input id="registeredNumber" class="input-field" placeholder="Registered Number" style="margin-top: 10px;" />
-                    <div id="regStatus" class="status"></div>
-                    <button id="registerBtn" class="btn btn-primary btn-full">Register Packet</button>
+                <!-- Action Cards Container -->
+                <!-- Action Cards Container -->
+                <div style="display: flex; gap: 1rem; flex-wrap: nowrap; overflow-x: auto; align-items: flex-start;">
+
+                    <!-- 1. Register Packet -->
+                    <div class="hero-card" style="flex: 1; min-width: 250px;">
+                        <h4>Register New Packet</h4>
+                        <p class="small">Add a new BlackBox.</p>
+                        <br>
+                        <input id="newPacketId" class="input-field" placeholder="Packet ID" />
+                        <input id="registeredNumber" class="input-field" placeholder="A9G Number"
+                            style="margin-top: 10px;" />
+
+                        <div id="regStatus" class="status"></div>
+                        <button id="registerBtn" class="btn btn-primary btn-full">Register Packet</button>
+                    </div>
+
+                    <!-- 2. Remove Packet -->
+                    <div class="hero-card" style="flex: 1; min-width: 250px;">
+                        <h4>Remove Packet</h4>
+                        <p class="small">Permanently delete a BlackBox.</p>
+                        <br>
+                        <input id="removePacketId" class="input-field" placeholder="Packet ID to Remove" />
+                        <div id="removeStatus" class="status"></div>
+                        <button id="removeBtn" class="btn btn-primary btn-full"
+                            style="background-color: #ef4444; border-color: #ef4444;">Remove Packet</button>
+                    </div>
+
+                    <!-- 3. Check Status -->
+                    <div class="hero-card" style="flex: 1; min-width: 250px;">
+                        <h4>Check Status</h4>
+                        <p class="small">View detailed packet info.</p>
+                        <br>
+                        <input id="checkPacketId" class="input-field" placeholder="Packet ID" />
+                        <div id="checkStatus" class="status"></div>
+                        <button id="checkStatusBtn" class="btn btn-primary btn-full"
+                            style="background-color: #3b82f6; border-color: #3b82f6;">Check Status</button>
+                    </div>
+                </div>
+
+                <!-- Detailed Status Table -->
+                <div id="statusResultSection" style="margin-top: 3rem; display: none;">
+                    <h4 style="text-align: center; margin-bottom: 1rem;">Packet Details</h4>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; color: #e5e7eb; font-size: 0.9em;">
+                            <thead>
+                                <tr style="background: rgba(255,255,255,0.1); text-align: left;">
+                                    <th style="padding: 10px;">Field</th>
+                                    <th style="padding: 10px;">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statusTableBody">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
             </div>
@@ -56,9 +104,13 @@
             window.location.href = '/';
         });
 
+
+        // Register Packet Logic
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const packetId = document.getElementById('newPacketId').value;
             const registeredNumber = document.getElementById('registeredNumber').value;
+
+
             const statusEl = document.getElementById('regStatus');
             const btn = document.getElementById('registerBtn');
 
@@ -76,7 +128,10 @@
                 const res = await fetch('/api/admin/register-packet', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ packetId, registeredNumber })
+                    body: JSON.stringify({
+                        packetId,
+                        registeredNumber
+                    })
                 });
                 const data = await res.json();
 
@@ -104,6 +159,142 @@
                 }
             } finally {
                 btn.disabled = false;
+            }
+        });
+
+        // Remove Packet Logic
+        document.getElementById('removeBtn').addEventListener('click', async () => {
+            const packetId = document.getElementById('removePacketId').value;
+            const statusEl = document.getElementById('removeStatus');
+            const btn = document.getElementById('removeBtn');
+
+            if (!packetId) {
+                statusEl.innerText = 'Please enter Packet ID';
+                statusEl.style.color = '#ef4444';
+                return;
+            }
+
+            // Confirm deletion
+            if (!confirm(`Are you sure you want to permanently delete packet "${packetId}"?`)) {
+                return;
+            }
+
+            statusEl.innerText = 'Removing...';
+            statusEl.style.color = '#9ca3af';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/remove-packet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    statusEl.innerText = 'Packet Removed Successfully!';
+                    statusEl.style.color = '#16a34a';
+                    document.getElementById('removePacketId').value = '';
+                } else {
+                    const msg = data.error || data.message || 'Removal failed';
+                    statusEl.innerText = msg;
+                    statusEl.style.color = '#ef4444';
+                    throw new Error('handled');
+                }
+            } catch (err) {
+                if (err.message !== 'handled') {
+                    statusEl.innerText = err.message;
+                    statusEl.style.color = '#ef4444';
+                }
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Check Status Logic
+        document.getElementById('checkStatusBtn').addEventListener('click', async () => {
+            const packetId = document.getElementById('checkPacketId').value;
+            const statusEl = document.getElementById('checkStatus');
+            const btn = document.getElementById('checkStatusBtn');
+
+            // Reset UI
+            statusEl.innerText = '';
+            document.getElementById('statusResultSection').style.display = 'none';
+
+            if (!packetId) {
+                statusEl.innerText = 'Please enter Packet ID';
+                statusEl.style.color = '#ef4444';
+                return;
+            }
+
+            statusEl.innerText = 'Checking...';
+            statusEl.style.color = '#9ca3af';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/packet-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    statusEl.innerText = '';
+                    const d = data.data;
+                    const tbody = document.getElementById('statusTableBody');
+                    tbody.innerHTML = '';
+
+                    const fields = [
+                        ['Packet ID', d.packetId],
+                        ['Registered Number', d.registeredNumber],
+                        ['Status', d.status],
+                        ['Is Active', d.isActive ? 'Yes' : 'No'],
+                        ['In Transit', d.inTransit ? 'Yes' : 'No'],
+                        ['From Location', d.fromLocation || '-'],
+                        ['To Location', d.toLocation || '-'],
+                        ['Packet Type', d.packetType || '-'],
+                        ['Authentication Type', d.authType || '-'],
+                        ['Battery Status', d.batteryStatus || '-'],
+                        ['Firmware Version', d.firmwareVersion || '-'],
+                        ['Sensor Data', typeof d.sensorData === 'object' ? JSON.stringify(d.sensorData) : (d.sensorData || '-')],
+                        ['User Details', d.userDetails || '-'],
+                        ['Attempts', d.attempts],
+                        ['OTP Status', d.otpStatus],
+                        ['Current OTP', d.otp || 'N/A']
+                    ];
+
+                    fields.forEach(([label, value]) => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                        tr.innerHTML = `
+                            <td style="padding: 10px; font-weight: 500;">${label}</td>
+                            <td style="padding: 10px; color: #9ca3af;">${value}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+
+                    document.getElementById('statusResultSection').style.display = 'block';
+                } else {
+                    statusEl.innerText = data.error || data.message || 'Check failed';
+                    statusEl.style.color = '#ef4444';
+                }
+            } catch (err) {
+                statusEl.innerText = err.message || 'Request failed';
+                statusEl.style.color = '#ef4444';
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const el = document.activeElement;
+                // If the user already focused a button, let the browser handle the click
+                if (el && el.tagName === 'BUTTON') return;
+
+                // Trigger registration
+                document.getElementById('registerBtn').click();
             }
         });
     </script>

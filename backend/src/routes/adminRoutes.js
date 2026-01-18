@@ -105,13 +105,32 @@ router.post(
             throw err;
         }
 
-        const { error } = await supabase
+        // First, check if the packet exists
+        const { data: existingPacket, error: fetchError } = await supabase
+            .from('packets')
+            .select('packetid')
+            .eq('packetid', packetId.trim())
+            .single();
+
+        if (fetchError || !existingPacket) {
+            if (fetchError && fetchError.code !== 'PGRST116') {
+                console.error('Supabase fetch error before delete:', fetchError);
+                const err = new Error('Database error');
+                err.statusCode = 500;
+                throw err;
+            }
+            const err = new Error('Packet not found');
+            err.statusCode = 404;
+            throw err;
+        }
+
+        const { error: deleteError } = await supabase
             .from('packets')
             .delete()
             .eq('packetid', packetId.trim());
 
-        if (error) {
-            console.error('Supabase delete error:', error);
+        if (deleteError) {
+            console.error('Supabase delete error:', deleteError);
             const err = new Error('Failed to remove packet');
             err.statusCode = 500;
             throw err;

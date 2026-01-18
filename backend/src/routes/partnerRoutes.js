@@ -44,10 +44,7 @@ router.post(
             toLocation,
             packetType,
             authType,
-            userDetails,
-            batteryStatus,
-            firmwareVersion,
-            sensorData
+            userDetails
         } = req.body;
 
         if (!packetId) {
@@ -70,6 +67,7 @@ router.post(
         }
 
         // Update with delivery details
+        // Note: Partner cannot update battery, firmware, or sensor data
         const { error: updateError } = await supabase
             .from('packets')
             .update({
@@ -78,9 +76,6 @@ router.post(
                 packet_type: packetType,
                 auth_type: authType,
                 user_details: userDetails,
-                battery_status: batteryStatus || '100%',
-                firmware_version: firmwareVersion || 'v1.0.0',
-                sensor_data: sensorData || '{"temp": 25, "humidity": 50}',
                 in_transit: true,  // Mark as in transit once assigned
                 is_active: true
             })
@@ -127,7 +122,7 @@ router.post(
         const safeData = {
             packetId: data.packetid,
             status: data.status,
-            batteryStatus: data.battery_status,
+            // Removed batteryStatus as requested
             fromLocation: data.from_location,
             toLocation: data.to_location,
             userDetails: data.user_details,

@@ -25,10 +25,10 @@
         <div class="container">
             <h2 id="heroGreeting" style="text-align: center; margin-bottom: 2rem;">Logistics Management</h2>
 
-            <div style="display: flex; gap: 1rem; flex-wrap: nowrap; overflow-x: auto; align-items: flex-start;">
+            <div class="dashboard-cards">
 
                 <!-- 1. Assign Delivery -->
-                <div class="hero-card" style="flex: 1; min-width: 300px;">
+                <div class="hero-card">
                     <h4>Assign Delivery To Packet</h4>
                     <p class="small">Configure an existing packet for delivery.</p>
                     <br>
@@ -38,15 +38,6 @@
                         <input id="fromLocation" class="input-field" placeholder="From (Wholesale)" />
                         <input id="toLocation" class="input-field" placeholder="To (Retail)" />
                     </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input id="batteryStatus" class="input-field" placeholder="Initial Battery (e.g. 100%)"
-                            value="100%" />
-                        <input id="firmwareVersion" class="input-field" placeholder="Firmware (e.g. v1.0)"
-                            value="v1.0.0" />
-                    </div>
-                    <input id="sensorData" class="input-field" placeholder="Initial Sensor Data (JSON)"
-                        value='{"temp": 25, "humidity": 50}' style="margin-top: 10px;" />
 
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
                         <select id="packetType" class="input-field" style="background: #1f2937; color: white;">
@@ -68,7 +59,7 @@
                 </div>
 
                 <!-- 2. Track Delivery -->
-                <div class="hero-card" style="flex: 1; min-width: 300px;">
+                <div class="hero-card">
                     <h4>Track Delivery</h4>
                     <p class="small">View current delivery status.</p>
                     <br>
@@ -122,11 +113,6 @@
             const authType = document.getElementById('authType').value;
             const userDetails = document.getElementById('userDetails').value;
 
-            // New Fields
-            const batteryStatus = document.getElementById('batteryStatus').value;
-            const firmwareVersion = document.getElementById('firmwareVersion').value;
-            const sensorData = document.getElementById('sensorData').value;
-
             const statusEl = document.getElementById('assignStatus');
 
             if (!packetId) {
@@ -148,10 +134,7 @@
                         toLocation,
                         packetType,
                         authType,
-                        userDetails,
-                        batteryStatus,
-                        firmwareVersion,
-                        sensorData
+                        userDetails
                     })
                 });
 
@@ -194,7 +177,6 @@
                     statusEl.innerText = '';
                     const d = data.data;
                     document.getElementById('resStatus').innerText = d.status;
-                    document.getElementById('resBattery').innerText = d.batteryStatus || 'N/A';
                     document.getElementById('resRoute').innerText = `${d.fromLocation || '?'} -> ${d.toLocation || '?'}`;
                     document.getElementById('resTransit').innerText = d.inTransit ? 'Yes' : 'No';
                     resultDiv.style.display = 'block';

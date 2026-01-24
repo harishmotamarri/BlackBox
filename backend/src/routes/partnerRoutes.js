@@ -43,7 +43,7 @@ router.post(
             fromLocation,
             toLocation,
             packetType,
-            authType,
+            weight,
             userDetails
         } = req.body;
 
@@ -74,7 +74,7 @@ router.post(
                 from_location: fromLocation,
                 to_location: toLocation,
                 packet_type: packetType,
-                auth_type: authType,
+                auth_type: weight ? `Weight: ${weight}kg` : '-',
                 user_details: userDetails,
                 in_transit: true,  // Mark as in transit once assigned
                 is_active: true
@@ -126,11 +126,35 @@ router.post(
             fromLocation: data.from_location,
             toLocation: data.to_location,
             userDetails: data.user_details,
+            weight: data.auth_type,
+            batteryStatus: data.battery_status,
             inTransit: data.in_transit,
             updatedAt: data.updated_at
         };
 
         res.json({ success: true, data: safeData });
+    })
+);
+
+// GET /api/partner/stats
+router.get(
+    '/stats',
+    asyncHandler(async (req, res) => {
+        const { data, error } = await supabase
+            .from('packets')
+            .select('is_active, in_transit, status');
+
+        if (error) {
+            throw new Error('Failed to fetch stats');
+        }
+
+        const stats = {
+            active: data.filter(p => p.is_active).length,
+            inTransit: data.filter(p => p.in_transit).length,
+            locked: data.filter(p => p.status === 'LOCKED').length
+        };
+
+        res.json({ success: true, stats });
     })
 );
 

@@ -25,6 +25,25 @@
         <div class="container">
             <h2 id="heroGreeting" style="text-align: center; margin-bottom: 2rem;">Logistics Management</h2>
 
+            <!-- System Stats Row -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; flex-wrap: wrap;">
+                <div class="hero-card"
+                    style="flex: 1; min-width: 150px; text-align: center; padding: 15px; border-radius: 15px;">
+                    <div class="small">Active Packets</div>
+                    <div id="statActive" style="font-size: 1.5rem; font-weight: 700; color: #7069f7;">--</div>
+                </div>
+                <div class="hero-card"
+                    style="flex: 1; min-width: 150px; text-align: center; padding: 15px; border-radius: 15px;">
+                    <div class="small">In Transit</div>
+                    <div id="statTransit" style="font-size: 1.5rem; font-weight: 700; color: #3b82f6;">--</div>
+                </div>
+                <div class="hero-card"
+                    style="flex: 1; min-width: 150px; text-align: center; padding: 15px; border-radius: 15px;">
+                    <div class="small">Locked Packets</div>
+                    <div id="statLocked" style="font-size: 1.5rem; font-weight: 700; color: orange;">--</div>
+                </div>
+            </div>
+
             <div class="dashboard-cards">
 
                 <!-- 1. Assign Delivery -->
@@ -35,24 +54,23 @@
                     <input id="packetId" class="input-field" placeholder="Packet ID (Available)" />
 
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input id="fromLocation" class="input-field" placeholder="From (Wholesale)" />
-                        <input id="toLocation" class="input-field" placeholder="To (Retail)" />
+                        <input id="fromLocation" class="input-field" placeholder="From (Wholesale)" style="flex: 1;" />
+                        <input id="toLocation" class="input-field" placeholder="To (Retail)" style="flex: 1;" />
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <select id="packetType" class="input-field" style="background: #1f2937; color: white;">
+                        <select id="packetType" class="input-field" style="flex: 1; background: #1f2937; color: white;">
                             <option value="Standard">Standard</option>
                             <option value="Fragile">Fragile</option>
                             <option value="High Value">High Value</option>
                         </select>
-                        <select id="authType" class="input-field" style="background: #1f2937; color: white;">
-                            <option value="OTP">OTP Based</option>
-                            <option value="QR">QR Based</option>
-                        </select>
+                        <input id="packetWeight" class="input-field" placeholder="Weight (kg)" style="flex: 1;" />
                     </div>
 
-                    <input id="userDetails" class="input-field" placeholder="User Details (Name/Contact)"
-                        style="margin-top: 10px;" />
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <input id="userName" class="input-field" placeholder="Customer Name" style="flex: 1;" />
+                        <input id="userPhone" class="input-field" placeholder="Phone Number" style="flex: 1;" />
+                    </div>
 
                     <div id="assignStatus" class="status"></div>
                     <button id="assignBtn" class="btn btn-primary btn-full">Assign & Activate</button>
@@ -72,28 +90,71 @@
                     <div id="trackResult" style="margin-top: 20px; text-align: left; display: none;">
                         <p class="small" style="color: #9ca3af;">Status: <span id="resStatus"
                                 style="color: white;"></span></p>
-                        <p class="small" style="color: #9ca3af;">Technician Data: <span
-                                style="color: #ef4444;">RESTRICTED</span></p>
+                        <p class="small" style="color: #9ca3af;">Weight: <span id="resWeight"
+                                style="color: white; font-weight: 500;"></span></p>
                         <p class="small" style="color: #9ca3af;">Battery: <span id="resBattery"
+                                style="color: #10b981; font-weight: 500;"></span></p>
+                        <p class="small" style="color: #9ca3af;">Customer: <span id="resUser"
                                 style="color: white;"></span></p>
                         <p class="small" style="color: #9ca3af;">Route: <span id="resRoute"
                                 style="color: white;"></span></p>
                         <p class="small" style="color: #9ca3af;">Transit: <span id="resTransit"
-                                style="color: white;"></span></p>
+                                style="color: #3b82f6; font-weight: 500;"></span></p>
                     </div>
                 </div>
 
+            </div> <!-- end dashboard-cards -->
+
+            <!-- Recent Activity -->
+            <div class="hero-card" style="margin-top: 2rem; max-width: 100%; width: 100%;">
+                <h4 style="display: flex; justify-content: space-between; align-items: center;">
+                    Recent Deliveries
+                    <span class="small" style="font-weight: normal; color: #16a34a;">● Live System</span>
+                </h4>
+                <div style="overflow-x: auto; margin-top: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border); color: var(--muted);">
+                                <th style="padding: 10px;">ID</th>
+                                <th style="padding: 10px;">Customer</th>
+                                <th style="padding: 10px;">Route</th>
+                                <th style="padding: 10px;">Weight</th>
+                                <th style="padding: 10px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentDeliveriesBody">
+                            <tr style="color: var(--muted);">
+                                <td colspan="5" style="padding: 20px; text-align: center;">No recent assignments found.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
     </section>
 
     <script>
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/partner/stats');
+                const data = await res.json();
+                if (res.ok && data.stats) {
+                    document.getElementById('statActive').innerText = String(data.stats.active).padStart(2, '0');
+                    document.getElementById('statTransit').innerText = String(data.stats.inTransit).padStart(2, '0');
+                    document.getElementById('statLocked').innerText = String(data.stats.locked).padStart(2, '0');
+                }
+            } catch (e) {
+                console.error('Failed to fetch stats:', e);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const user = localStorage.getItem('partnerUser');
             if (user) {
                 document.getElementById('welcomeMsg').innerText = `Partner: ${user}`;
                 // Set Prominent Greeting
                 document.getElementById('heroGreeting').innerText = `Welcome back, ${user}!`;
+                fetchStats();
             } else {
                 window.location.href = '/ecommerce_login.html';
             }
@@ -104,14 +165,39 @@
             window.location.href = '/ecommerce_login.html';
         });
 
+        const recentAssignments = [];
+
+        function addRecentAssignment(id, customer, from, to, weight) {
+            recentAssignments.unshift({ id, customer, route: `${from} -> ${to}`, weight, status: 'Active' });
+            if (recentAssignments.length > 5) recentAssignments.pop();
+            renderRecentTable();
+        }
+
+        function renderRecentTable() {
+            const tbody = document.getElementById('recentDeliveriesBody');
+            if (!tbody) return;
+            tbody.innerHTML = recentAssignments.map(a => `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 10px;">${a.id}</td>
+                    <td style="padding: 10px;">${a.customer}</td>
+                    <td style="padding: 10px;">${a.route}</td>
+                    <td style="padding: 10px;">${a.weight}kg</td>
+                    <td style="padding: 10px; color: #3b82f6;">${a.status}</td>
+                </tr>
+            `).join('');
+        }
+
         // Assign Delivery Logic
         document.getElementById('assignBtn').addEventListener('click', async () => {
             const packetId = document.getElementById('packetId').value;
             const fromLocation = document.getElementById('fromLocation').value;
             const toLocation = document.getElementById('toLocation').value;
             const packetType = document.getElementById('packetType').value;
-            const authType = document.getElementById('authType').value;
-            const userDetails = document.getElementById('userDetails').value;
+            const weight = document.getElementById('packetWeight').value;
+            const userName = document.getElementById('userName').value;
+            const userPhone = document.getElementById('userPhone').value;
+
+            const userDetails = `${userName} (${userPhone})`;
 
             const statusEl = document.getElementById('assignStatus');
 
@@ -133,7 +219,7 @@
                         fromLocation,
                         toLocation,
                         packetType,
-                        authType,
+                        weight,
                         userDetails
                     })
                 });
@@ -142,9 +228,15 @@
                 if (res.ok) {
                     statusEl.innerText = 'Delivery Assigned!';
                     statusEl.style.color = '#16a34a';
+
+                    addRecentAssignment(packetId, userName, fromLocation, toLocation, weight);
+                    fetchStats();
+
                     // Clear fields
                     document.getElementById('packetId').value = '';
-                    document.getElementById('userDetails').value = '';
+                    document.getElementById('userName').value = '';
+                    document.getElementById('userPhone').value = '';
+                    document.getElementById('packetWeight').value = '';
                 } else {
                     throw new Error(data.message || 'Failed');
                 }
@@ -153,6 +245,7 @@
                 statusEl.style.color = '#ef4444';
             }
         });
+
 
         // Track Logic
         document.getElementById('trackBtn').addEventListener('click', async () => {
@@ -177,6 +270,11 @@
                     statusEl.innerText = '';
                     const d = data.data;
                     document.getElementById('resStatus').innerText = d.status;
+                    let displayWeight = d.weight || '-';
+                    if (displayWeight === 'OTP' || displayWeight === 'QR') displayWeight = '-';
+                    document.getElementById('resWeight').innerText = displayWeight.replace('Weight: ', '').replace('kg', '') + (displayWeight !== '-' ? ' kg' : '');
+                    document.getElementById('resBattery').innerText = d.batteryStatus || 'N/A';
+                    document.getElementById('resUser').innerText = d.userDetails || '-';
                     document.getElementById('resRoute').innerText = `${d.fromLocation || '?'} -> ${d.toLocation || '?'}`;
                     document.getElementById('resTransit').innerText = d.inTransit ? 'Yes' : 'No';
                     resultDiv.style.display = 'block';

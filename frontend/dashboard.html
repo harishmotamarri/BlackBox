@@ -19,7 +19,7 @@
     </header>
 
     <section class="hero">
-        <div class="container hero-inner">
+        <div class="container">
             <div>
                 <h3 style="color: orange;" id="welcomeMsg">Welcome, Admin</h3>
                 <p class="hero-sub">You have secure access to this system.</p>
@@ -45,7 +45,7 @@
                     </div>
 
                     <!-- 2. Remove Packet -->
-                    <div class="hero-card">
+                    <div class="hero-card" style="background-color: rgba(239, 68, 68, 0.05);">
                         <h4>Remove Packet</h4>
                         <p class="small">Permanently delete a BlackBox.</p>
                         <br>
@@ -56,7 +56,7 @@
                     </div>
 
                     <!-- 3. Check Status -->
-                    <div class="hero-card">
+                    <div class="hero-card" style="background-color: rgba(59, 130, 246, 0.05);">
                         <h4>Check Status</h4>
                         <p class="small">View detailed packet info.</p>
                         <br>
@@ -255,22 +255,29 @@
                         ['From Location', d.fromLocation || '-'],
                         ['To Location', d.toLocation || '-'],
                         ['Packet Type', d.packetType || '-'],
-                        ['Authentication Type', d.authType || '-'],
+                        ['Weight', d.authType || '-'],
                         ['Battery Status', d.batteryStatus || '-'],
                         ['Firmware Version', d.firmwareVersion || '-'],
                         ['Sensor Data', typeof d.sensorData === 'object' ? JSON.stringify(d.sensorData) : (d.sensorData || '-')],
                         ['User Details', d.userDetails || '-'],
                         ['Attempts', d.attempts],
-                        ['OTP Status', d.otpStatus],
-                        ['Current OTP', d.otp || 'N/A']
+                        ['OTP Status', d.otpStatus]
                     ];
 
                     fields.forEach(([label, value]) => {
+                        let displayValue = value;
+                        if (label === 'Weight') {
+                            if (displayValue === 'OTP' || displayValue === 'QR') displayValue = '-';
+                            else if (displayValue && displayValue.includes('Weight:')) {
+                                displayValue = displayValue.replace('Weight: ', '').replace('kg', '') + ' kg';
+                            }
+                        }
+
                         const tr = document.createElement('tr');
                         tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
                         tr.innerHTML = `
                             <td style="padding: 10px; font-weight: 500;">${label}</td>
-                            <td style="padding: 10px; color: #9ca3af;">${value}</td>
+                            <td style="padding: 10px; color: #9ca3af;">${displayValue}</td>
                         `;
                         tbody.appendChild(tr);
                     });

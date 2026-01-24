@@ -72,6 +72,7 @@ router.post(
                 registered_number: registeredNumber.trim(),
                 status: 'LOCKED',
                 attempts: 0,
+                auth_type: '-',
                 // New Fields (set to defaults or null as they are not provided by Admin)
                 is_active: true,
                 in_transit: false

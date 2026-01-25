@@ -15,8 +15,14 @@
 
     <header class="nav">
         <div class="container nav-inner">
-            <div class="logo">BlackBox-Admin</div>
-            <a href="/" class="admin">Back to Home</a>
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">BlackBox-Admin</a>
+            <div class="dropdown">
+                <button class="dropdown-btn">Login</button>
+                <div class="dropdown-content">
+                    <a href="admin.html">Admin Login</a>
+                    <a href="ecommerce_login.html">Partner Login</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -49,6 +55,7 @@
         </div>
     </section>
 
+    <script src="js/navigation.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();

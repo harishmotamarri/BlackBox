@@ -1,1 +1,0 @@
-COLUMNS: packetid, otphash, otpexpiresat, attempts, status, createdat, registered_number, current_otp, is_active, in_transit, sensor_data, battery_status, firmware_version, from_location, to_location, packet_type, auth_type, user_details

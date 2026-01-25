@@ -15,8 +15,14 @@
 
   <header class="nav">
     <div class="container nav-inner">
-      <div class="logo">BlackBox</div>
-      <button class="admin" onclick="window.location.href='admin.html'">Admin Login</button>
+      <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">BlackBox</a>
+      <div class="dropdown">
+        <button class="dropdown-btn">Login</button>
+        <div class="dropdown-content">
+          <a href="admin.html">Admin Login</a>
+          <a href="ecommerce_login.html">Partner Login</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -72,6 +78,7 @@
     </div>
   </section>
 
+  <script src="js/navigation.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 

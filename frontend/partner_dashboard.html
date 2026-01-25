@@ -13,9 +13,16 @@
 
     <header class="nav">
         <div class="container nav-inner">
-            <div class="logo">BlackBox-Partner</div>
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">BlackBox-Partner</a>
             <div style="display: flex; gap: 1rem; align-items: center;">
                 <span id="welcomeMsg" style="color: #9ca3af; font-size: 0.9em;"></span>
+                <div class="dropdown">
+                    <button class="dropdown-btn">Login</button>
+                    <div class="dropdown-content">
+                        <a href="admin.html">Admin Login</a>
+                        <a href="ecommerce_login.html">Partner Login</a>
+                    </div>
+                </div>
                 <button class="admin" id="logoutBtn" style="border-color: #ef4444; color: #ef4444;">Logout</button>
             </div>
         </div>
@@ -199,6 +206,7 @@
             </div>
     </section>
 
+    <script src="js/navigation.js"></script>
     <script>
         async function fetchStats() {
             try {

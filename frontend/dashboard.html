@@ -45,14 +45,29 @@
                     </div>
 
                     <!-- 2. Remove Packet -->
-                    <div class="hero-card" style="background-color: rgba(239, 68, 68, 0.05);">
+                    <div class="hero-card" style="background-color: rgba(112, 105, 247, 0.03);">
                         <h4>Remove Packet</h4>
                         <p class="small">Permanently delete a BlackBox.</p>
                         <br>
                         <input id="removePacketId" class="input-field" placeholder="Packet ID to Remove" />
+
+                        <!-- Anti-accidental Removal CAPTCHA -->
+                        <div id="captchaArea"
+                            style="margin-top: 15px; padding: 12px; border: 1px dashed var(--accent); border-radius: 8px;">
+                            <label class="small" style="color: var(--accent); font-weight: 600;">Security
+                                Validation</label>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                                <div id="captchaText" class="admin"
+                                    style="padding: 5px 15px; font-weight: 700; background: rgba(112, 105, 247, 0.1); border-color: var(--accent); color: var(--accent); min-width: 80px; text-align: center;">
+                                    --</div>
+                                <input id="captchaInput" class="input-field" placeholder="Answer"
+                                    style="margin-bottom: 0; flex: 1;" />
+                            </div>
+                        </div>
+
                         <div id="removeStatus" class="status"></div>
-                        <button id="removeBtn" class="btn btn-primary btn-full"
-                            style="background-color: #ef4444; border-color: #ef4444;">Remove Packet</button>
+                        <button id="removeBtn" class="btn btn-primary btn-full" style="margin-top: 15px;">Remove
+                            Packet</button>
                     </div>
 
                     <!-- 3. Check Status -->
@@ -90,10 +105,21 @@
     </section>
 
     <script>
+        let currentCaptchaAnswer = null;
+
+        function generateCaptcha() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            currentCaptchaAnswer = a + b;
+            document.getElementById('captchaText').innerText = `${a} + ${b} = ?`;
+            document.getElementById('captchaInput').value = '';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const username = localStorage.getItem('adminUser');
             if (username) {
                 document.getElementById('welcomeMsg').innerText = `Welcome, ${username}`;
+                generateCaptcha();
             } else {
                 // Not logged in? Redirect home
                 window.location.href = '/';
@@ -166,6 +192,7 @@
         // Remove Packet Logic
         document.getElementById('removeBtn').addEventListener('click', async () => {
             const packetId = document.getElementById('removePacketId').value;
+            const captchaInput = document.getElementById('captchaInput').value;
             const statusEl = document.getElementById('removeStatus');
             const btn = document.getElementById('removeBtn');
 
@@ -175,8 +202,16 @@
                 return;
             }
 
+            if (parseInt(captchaInput) !== currentCaptchaAnswer) {
+                statusEl.innerText = 'Incorrect CAPTCHA answer';
+                statusEl.style.color = '#ef4444';
+                generateCaptcha();
+                return;
+            }
+
             // Confirm deletion
             if (!confirm(`Are you sure you want to permanently delete packet "${packetId}"?`)) {
+                generateCaptcha();
                 return;
             }
 
@@ -196,6 +231,7 @@
                     statusEl.innerText = 'Packet Removed Successfully!';
                     statusEl.style.color = '#16a34a';
                     document.getElementById('removePacketId').value = '';
+                    generateCaptcha();
                 } else {
                     const msg = data.error || data.message || 'Removal failed';
                     statusEl.innerText = msg;
@@ -298,11 +334,21 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const el = document.activeElement;
-                // If the user already focused a button, let the browser handle the click
                 if (el && el.tagName === 'BUTTON') return;
 
-                // Trigger registration
-                document.getElementById('registerBtn').click();
+                // Find the closest card and click its primary button
+                const card = el.closest('.hero-card');
+                if (card) {
+                    const btn = card.querySelector('button.btn-primary');
+                    if (btn) {
+                        e.preventDefault();
+                        btn.click();
+                    }
+                } else {
+                    // Fallback for general Enter
+                    const regBtn = document.getElementById('registerBtn');
+                    if (regBtn) regBtn.click();
+                }
             }
         });
     </script>

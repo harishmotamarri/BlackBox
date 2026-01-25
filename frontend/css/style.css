@@ -16,6 +16,15 @@ body {
   font-family: Inter, system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
+  user-select: none;
+  /* Disable text selection for security */
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+  /* Allow selection in inputs */
 }
 
 .container {
@@ -262,6 +271,56 @@ body {
 .dashboard-cards>.hero-card {
   flex: 1;
   min-width: 250px;
+}
+
+/* 3-Block Layout for Assignment */
+.assignment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+  align-items: stretch;
+}
+
+.assignment-block {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.assignment-block h5 {
+  margin: 0 0 15px 0;
+  color: var(--accent);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.input-group {
+  margin-bottom: 12px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.read-only-sync {
+  background: rgba(112, 105, 247, 0.05) !important;
+  border-style: dashed !important;
+  color: var(--accent) !important;
+  cursor: default;
+}
+
+@media (max-width: 1024px) {
+  .assignment-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {

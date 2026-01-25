@@ -29,7 +29,7 @@
             <div style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; flex-wrap: wrap;">
                 <div class="hero-card"
                     style="flex: 1; min-width: 150px; text-align: center; padding: 15px; border-radius: 15px;">
-                    <div class="small">Active Packets</div>
+                    <div class="small">In Inventory</div>
                     <div id="statActive" style="font-size: 1.5rem; font-weight: 700; color: #7069f7;">--</div>
                 </div>
                 <div class="hero-card"
@@ -46,34 +46,100 @@
 
             <div class="dashboard-cards">
 
-                <!-- 1. Assign Delivery -->
-                <div class="hero-card">
+                <!-- Redesigned 3-Block Assignment Section -->
+                <div class="hero-card" style="max-width: 1200px; width: 100%;">
                     <h4>Assign Delivery To Packet</h4>
-                    <p class="small">Configure an existing packet for delivery.</p>
-                    <br>
-                    <input id="packetId" class="input-field" placeholder="Packet ID (Available)" />
+                    <p class="small">Configure delivery, customer, and order details.</p>
 
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input id="fromLocation" class="input-field" placeholder="From (Wholesale)" style="flex: 1;" />
-                        <input id="toLocation" class="input-field" placeholder="To (Retail)" style="flex: 1;" />
+                    <div class="assignment-grid">
+                        <!-- 1. Packet Details -->
+                        <div class="assignment-block">
+                            <h5>1. Packet Details</h5>
+                            <div class="input-group">
+                                <label>Packet ID</label>
+                                <input id="packetId" class="input-field" placeholder="P-XXXX" />
+                            </div>
+                            <div class="input-group">
+                                <label>Weight (kg)</label>
+                                <input id="packetWeight" class="input-field" placeholder="2.5" />
+                            </div>
+                            <div class="input-group">
+                                <label>Packet Type</label>
+                                <select id="packetType" class="input-field" style="background: #1f2937; color: white;">
+                                    <option value="Standard">Standard</option>
+                                    <option value="Fragile">Fragile</option>
+                                    <option value="High Value">High Value</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <div class="input-group" style="flex: 1;">
+                                    <label>From</label>
+                                    <input id="fromLocation" class="input-field" placeholder="Mumbai" />
+                                </div>
+                                <div class="input-group" style="flex: 1;">
+                                    <label>To</label>
+                                    <input id="toLocation" class="input-field" placeholder="Bangalore" />
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Est. Battery (%)</label>
+                                <input id="estBattery" class="input-field" placeholder="85%" />
+                            </div>
+                        </div>
+
+                        <!-- 2. Customer Details -->
+                        <div class="assignment-block">
+                            <h5>2. Customer Details</h5>
+                            <div class="input-group">
+                                <label>Full Name</label>
+                                <input id="userName" class="input-field" placeholder="Hemanth" />
+                            </div>
+                            <div class="input-group">
+                                <label>Mobile Number</label>
+                                <input id="userPhone" class="input-field" placeholder="+91 XXXX XXXX" />
+                            </div>
+                            <div class="input-group">
+                                <label>Shipping Address</label>
+                                <textarea id="shippingAddr" class="input-field" placeholder="Full street address..."
+                                    style="height: 120px; resize: none;"></textarea>
+                            </div>
+
+                            <div style="margin-top: auto;">
+                                <div id="assignStatus" class="status"></div>
+                                <button id="assignBtn" class="btn btn-primary btn-full">Assign & Activate</button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Order Details -->
+                        <div class="assignment-block">
+                            <h5>3. Order Details</h5>
+                            <div class="input-group">
+                                <label>Product Name</label>
+                                <input id="productName" class="input-field" placeholder="iPhone 15 Pro" />
+                            </div>
+                            <div class="input-group">
+                                <label>Product Price ($)</label>
+                                <input id="productPrice" class="input-field" placeholder="999.00" />
+                            </div>
+                            <div class="input-group">
+                                <label>Product Price Type (Auto)</label>
+                                <input id="orderPriceType" class="input-field read-only-sync" readonly
+                                    value="Standard" />
+                            </div>
+                            <div class="input-group">
+                                <label>Weight Sync (Auto)</label>
+                                <input id="orderWeight" class="input-field read-only-sync" readonly value="-" />
+                            </div>
+                            <div class="input-group">
+                                <label>Seller Name</label>
+                                <input id="sellerName" class="input-field" placeholder="Global Retailers" />
+                            </div>
+                            <div class="input-group">
+                                <label>Seller Contact</label>
+                                <input id="sellerContact" class="input-field" placeholder="contact@seller.com" />
+                            </div>
+                        </div>
                     </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <select id="packetType" class="input-field" style="flex: 1; background: #1f2937; color: white;">
-                            <option value="Standard">Standard</option>
-                            <option value="Fragile">Fragile</option>
-                            <option value="High Value">High Value</option>
-                        </select>
-                        <input id="packetWeight" class="input-field" placeholder="Weight (kg)" style="flex: 1;" />
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input id="userName" class="input-field" placeholder="Customer Name" style="flex: 1;" />
-                        <input id="userPhone" class="input-field" placeholder="Phone Number" style="flex: 1;" />
-                    </div>
-
-                    <div id="assignStatus" class="status"></div>
-                    <button id="assignBtn" class="btn btn-primary btn-full">Assign & Activate</button>
                 </div>
 
                 <!-- 2. Track Delivery -->
@@ -187,6 +253,20 @@
             `).join('');
         }
 
+        // Auto-sync logic for Order Details
+        const packetTypeInput = document.getElementById('packetType');
+        const orderPriceTypeInput = document.getElementById('orderPriceType');
+        const packetWeightInput = document.getElementById('packetWeight');
+        const orderWeightInput = document.getElementById('orderWeight');
+
+        packetTypeInput.addEventListener('change', () => {
+            orderPriceTypeInput.value = packetTypeInput.value;
+        });
+
+        packetWeightInput.addEventListener('input', () => {
+            orderWeightInput.value = packetWeightInput.value ? `${packetWeightInput.value} kg` : '-';
+        });
+
         // Assign Delivery Logic
         document.getElementById('assignBtn').addEventListener('click', async () => {
             const packetId = document.getElementById('packetId').value;
@@ -194,10 +274,25 @@
             const toLocation = document.getElementById('toLocation').value;
             const packetType = document.getElementById('packetType').value;
             const weight = document.getElementById('packetWeight').value;
+            const estBattery = document.getElementById('estBattery').value;
+
             const userName = document.getElementById('userName').value;
             const userPhone = document.getElementById('userPhone').value;
+            const shippingAddr = document.getElementById('shippingAddr').value;
 
-            const userDetails = `${userName} (${userPhone})`;
+            const sellerName = document.getElementById('sellerName').value;
+            const sellerContact = document.getElementById('sellerContact').value;
+            const productName = document.getElementById('productName').value;
+            const productPrice = document.getElementById('productPrice').value;
+
+            // Comprehensive User Details
+            const userDetails = `
+Product: ${productName} (Price: $${productPrice})
+Customer: ${userName} (${userPhone})
+Addr: ${shippingAddr}
+Seller: ${sellerName} (${sellerContact})
+Battery at Start: ${estBattery}
+            `.trim();
 
             const statusEl = document.getElementById('assignStatus');
 
@@ -220,6 +315,10 @@
                         toLocation,
                         packetType,
                         weight,
+                        estBattery,
+                        shippingAddr,
+                        sellerName,
+                        sellerContact,
                         userDetails
                     })
                 });
@@ -237,6 +336,15 @@
                     document.getElementById('userName').value = '';
                     document.getElementById('userPhone').value = '';
                     document.getElementById('packetWeight').value = '';
+                    document.getElementById('fromLocation').value = '';
+                    document.getElementById('toLocation').value = '';
+                    document.getElementById('estBattery').value = '';
+                    document.getElementById('shippingAddr').value = '';
+                    document.getElementById('sellerName').value = '';
+                    document.getElementById('sellerContact').value = '';
+                    document.getElementById('productName').value = '';
+                    document.getElementById('productPrice').value = '';
+                    orderWeightInput.value = '-';
                 } else {
                     throw new Error(data.message || 'Failed');
                 }
@@ -284,6 +392,23 @@
             } catch (e) {
                 statusEl.innerText = e.message;
                 statusEl.style.color = '#ef4444';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const el = document.activeElement;
+                if (el && el.tagName === 'BUTTON') return;
+
+                // Find the closest card and click its primary button
+                const card = el.closest('.hero-card');
+                if (card) {
+                    const btn = card.querySelector('button.btn-primary');
+                    if (btn) {
+                        e.preventDefault();
+                        btn.click();
+                    }
+                }
             }
         });
     </script>

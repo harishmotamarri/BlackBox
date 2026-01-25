@@ -109,7 +109,7 @@ router.post(
         // First, check if the packet exists
         const { data: existingPacket, error: fetchError } = await supabase
             .from('packets')
-            .select('packetid')
+            .select('packetid, in_transit')
             .eq('packetid', packetId.trim())
             .single();
 
@@ -122,6 +122,13 @@ router.post(
             }
             const err = new Error('Packet not found');
             err.statusCode = 404;
+            throw err;
+        }
+
+        // BLOCK REMOVAL IF IN TRANSIT
+        if (existingPacket.in_transit) {
+            const err = new Error('Packet is currently with a partner (In Transit) and cannot be removed.');
+            err.statusCode = 403;
             throw err;
         }
 

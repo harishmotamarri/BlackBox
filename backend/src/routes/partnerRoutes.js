@@ -1,5 +1,6 @@
 const express = require('express');
 const { supabase } = require('../db/database');
+const { ensureLockTimeout } = require('../utils/packetUtils');
 
 const router = express.Router();
 
@@ -105,7 +106,7 @@ router.post(
             throw err;
         }
 
-        const { data, error } = await supabase
+        let { data, error } = await supabase
             .from('packets')
             .select('*')
             .eq('packetid', packetId)
@@ -116,6 +117,8 @@ router.post(
             err.statusCode = 404;
             throw err;
         }
+
+        data = await ensureLockTimeout(data);
 
         // Filter out sensitive technician fields if any (e.g., firmware_version could be hidden)
         // For now, we return most relevant logistics data

@@ -1,6 +1,7 @@
 const express = require('express');
 const { supabase } = require('../db/database');
 const { generateOtp, hashOtp, safeEqualHex } = require('../utils/otp');
+const { ensureLockTimeout, ADDED_AUTO_LOCK_DELAY_MS } = require('../utils/packetUtils');
 
 const router = express.Router();
 
@@ -130,8 +131,6 @@ router.post(
   })
 );
 
-const ADDED_AUTO_LOCK_DELAY_MS = 5 * 60 * 1000; // 5 minutes
-
 // POST /api/packet/unlock
 router.post(
   '/unlock',
@@ -177,7 +176,8 @@ router.get(
     const { packetId } = req.params;
     requireField(packetId, 'Packet ID');
 
-    const packet = await fetchPacketOr404(packetId);
+    let packet = await fetchPacketOr404(packetId);
+    packet = await ensureLockTimeout(packet);
 
     res.json({
       success: true,

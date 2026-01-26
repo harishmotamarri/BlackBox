@@ -409,6 +409,21 @@ textarea,
   .assignment-grid {
     grid-template-columns: 1fr;
   }
+
+  /* Mobile: Order 1, 2, 3, 4 (Action last) */
+  .assignment-action-area {
+    grid-column: 1;
+    order: 4;
+    margin-top: 10px;
+  }
+}
+
+/* Desktop: Action in middle column */
+.assignment-action-area {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 @media (max-width: 768px) {

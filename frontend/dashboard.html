@@ -329,6 +329,7 @@
                     });
 
                     document.getElementById('statusResultSection').style.display = 'block';
+                    document.getElementById('statusResultSection').scrollIntoView({ behavior: 'smooth' });
                 } else {
                     statusEl.innerText = data.error || data.message || 'Check failed';
                     statusEl.style.color = '#ef4444';

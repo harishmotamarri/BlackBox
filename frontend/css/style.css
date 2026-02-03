@@ -38,6 +38,8 @@ textarea,
   top: 0;
   background: rgba(2, 6, 23, 0.95);
   border-bottom: 1px solid var(--border);
+  z-index: 100;
+  /* Ensure nav stays on top of hero */
 }
 
 .nav-inner {
@@ -110,23 +112,31 @@ textarea,
 }
 
 .dropdown-btn {
-  background: transparent;
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text);
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .dropdown-btn:hover {
+  background: rgba(112, 105, 247, 0.15);
   border-color: var(--accent);
-  color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(112, 105, 247, 0.3), 0 0 30px rgba(112, 105, 247, 0.1);
+  transform: translateY(-1px);
+  text-shadow: 0 0 8px rgba(112, 105, 247, 0.4);
 }
+
 
 .dropdown-btn::after {
   content: '▼';
@@ -135,8 +145,21 @@ textarea,
 }
 
 .logo {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  position: relative;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+  transition: opacity 0.2s;
+}
+
+.logo:hover {
+  opacity: 0.9;
 }
 
 .admin {
@@ -162,9 +185,94 @@ textarea,
   background: rgba(112, 105, 247, 0.1);
 }
 
-/* Hero */
+/* Hero (Jumbotron) */
 .hero {
+  padding: 100px 10px 150px;
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 70%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+/* Mission Section */
+.mission {
   padding: 80px 0;
+  background: var(--bg);
+}
+
+.mission-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 60px;
+}
+
+.mission-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.mission-header p {
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.mission-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 30px;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.mission-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mission-card .icon {
+  font-size: 40px;
+  margin-bottom: 20px;
+  background: rgba(112, 105, 247, 0.1);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(112, 105, 247, 0.2);
+}
+
+.mission-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+.mission-card p {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0;
 }
 
 .hero-inner {
@@ -174,28 +282,94 @@ textarea,
 }
 
 .eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  color: orange;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: inline-block;
+  background: rgba(112, 105, 247, 0.1);
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1px solid rgba(112, 105, 247, 0.2);
+  box-shadow: 0 0 20px rgba(112, 105, 247, 0.1);
+}
+
+.hero h1 {
+  font-size: 4rem;
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .hero-sub {
-  color: var(--muted);
+  color: #94a3b8;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-bottom: 0;
+  font-weight: 400;
 }
 
 /* Card */
 .hero-media {
   display: flex;
   justify-content: center;
+  align-items: center;
+  /* Prevent vertical stretching */
 }
 
 .hero-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  padding: 22px;
-  max-width: 360px;
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 24px 28px;
+  max-width: 380px;
   width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+  /* Animations & Transitions */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s ease;
+  animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: 0.2s;
+}
+
+.hero-card h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+}
+
+.hero-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(112, 105, 247, 0.15);
+  /* Soft accent glow */
+  border-color: rgba(112, 105, 247, 0.5);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .small {
@@ -279,7 +453,21 @@ textarea,
   }
 
   .hero {
-    padding: 40px 0;
+    padding: 80px 20px 100px;
+    /* Spacious but fitted for mobile */
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+    /* Smaller headline for mobile */
+  }
+
+  .mission-header h2 {
+    font-size: 2rem;
+  }
+
+  .mission {
+    padding: 60px 20px;
   }
 
   .nav-inner {
@@ -303,16 +491,6 @@ textarea,
 }
 
 /* Partner Access Section */
-.partner-access {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 2rem;
-  text-align: center;
-  max-width: 300px;
-  margin: 0 auto;
-  backdrop-filter: blur(10px);
-}
 
 .partner-access h3 {
   color: #e5e7eb;

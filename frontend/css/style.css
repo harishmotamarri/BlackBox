@@ -53,28 +53,29 @@ textarea,
 /* Dropdown Menu */
 .dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .dropdown-content {
   display: block;
   position: absolute;
+  top: calc(100% + 10px);
   right: 0;
-  background-color: var(--card);
-  min-width: 180px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.98) 100%);
+  min-width: 210px;
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.45);
   z-index: 1000;
-  border-radius: 12px;
-  border: 1px solid var(--border);
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
   overflow: hidden;
-  margin-top: 5px;
-  /* Reduced gap */
 
   /* Smooth Transition */
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-8px) scale(0.98);
+  transform-origin: top right;
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.22s;
   pointer-events: none;
 }
 
@@ -94,12 +95,18 @@ textarea,
   text-decoration: none;
   display: block;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  font-weight: 500;
+  transition: background 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+}
+
+.dropdown-content a+a {
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
 }
 
 .dropdown-content a:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--accent);
+  background-color: rgba(112, 105, 247, 0.14);
+  color: #fff;
+  padding-left: 20px;
 }
 
 /* Hover & Active States */
@@ -107,41 +114,64 @@ textarea,
 .dropdown.active .dropdown-content {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
 .dropdown-btn {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text);
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #3f3a8d 0%, #7069f7 45%, #5a4fd9 100%);
+  border: 1px solid rgba(185, 180, 255, 0.5);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  gap: 8px;
+  box-shadow: 0 10px 22px rgba(67, 56, 202, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.dropdown-btn::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 45%);
+  z-index: -1;
 }
 
 .dropdown-btn:hover {
-  background: rgba(112, 105, 247, 0.15);
-  border-color: var(--accent);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(112, 105, 247, 0.3), 0 0 30px rgba(112, 105, 247, 0.1);
-  transform: translateY(-1px);
-  text-shadow: 0 0 8px rgba(112, 105, 247, 0.4);
+  transform: translateY(-2px);
+  filter: saturate(1.07) brightness(1.05);
+  box-shadow: 0 14px 26px rgba(67, 56, 202, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
+.dropdown-btn:active {
+  transform: translateY(0);
+}
+
+.dropdown-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(112, 105, 247, 0.35), 0 14px 26px rgba(67, 56, 202, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
 
 .dropdown-btn::after {
-  content: '▼';
-  font-size: 0.7em;
-  opacity: 0.7;
+  content: '▾';
+  font-size: 0.72rem;
+  opacity: 0.9;
+  transition: transform 0.2s ease;
+}
+
+.dropdown.active .dropdown-btn::after,
+.dropdown:hover .dropdown-btn::after {
+  transform: rotate(180deg);
 }
 
 .logo {
@@ -479,6 +509,15 @@ textarea,
 @media (max-width: 480px) {
   .hero h1 {
     font-size: 28px;
+  }
+
+  .dropdown-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .dropdown-content {
+    min-width: 190px;
   }
 
   .container {

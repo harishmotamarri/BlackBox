@@ -236,73 +236,192 @@ textarea,
 
 /* Mission Section */
 .mission {
-  padding: 80px 0;
-  background: var(--bg);
+  position: relative;
+  padding: 96px 0 110px;
+  background:
+    radial-gradient(110% 120% at 2% 0%, rgba(112, 105, 247, 0.24) 0%, rgba(112, 105, 247, 0) 48%),
+    radial-gradient(120% 130% at 100% 100%, rgba(14, 165, 233, 0.16) 0%, rgba(14, 165, 233, 0) 52%),
+    linear-gradient(180deg, #040615 0%, #050816 100%);
+  isolation: isolate;
+}
+
+.mission::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(112, 105, 247, 0.14) 0%, transparent 22%, transparent 78%, rgba(56, 189, 248, 0.12) 100%);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.mission::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.mission-shell {
+  position: relative;
+  z-index: 1;
 }
 
 .mission-header {
   text-align: center;
-  max-width: 600px;
-  margin: 0 auto 60px;
+  max-width: 760px;
+  margin: 0 auto 56px;
+}
+
+.mission-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.7);
+  color: #c7d2fe;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .mission-header h2 {
-  font-size: 2.5rem;
+  font-family: 'Space Grotesk', Inter, system-ui, sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   font-weight: 700;
   color: white;
-  margin-bottom: 16px;
+  margin: 0 0 16px;
+  text-wrap: balance;
 }
 
 .mission-header p {
-  color: var(--muted);
-  font-size: 1.1rem;
+  color: #bac6dd;
+  font-size: 1.08rem;
+  line-height: 1.75;
+  margin: 0;
 }
 
 .mission-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .mission-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 30px;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 30px 28px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(155deg, rgba(15, 23, 42, 0.82) 0%, rgba(8, 14, 33, 0.94) 100%);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.45);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  animation: missionRise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.mission-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #7069f7 0%, #38bdf8 100%);
+  opacity: 0.75;
 }
 
 .mission-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-8px);
+  border-color: rgba(129, 140, 248, 0.65);
+  box-shadow: 0 20px 42px rgba(2, 6, 23, 0.55), 0 0 22px rgba(112, 105, 247, 0.18);
 }
 
 .mission-card .icon {
-  font-size: 40px;
-  margin-bottom: 20px;
-  background: rgba(112, 105, 247, 0.1);
-  width: 80px;
-  height: 80px;
+  font-size: 34px;
+  margin-bottom: 10px;
+  width: 68px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid rgba(112, 105, 247, 0.2);
+  border: 1px solid rgba(129, 140, 248, 0.42);
+  background: linear-gradient(145deg, rgba(67, 56, 202, 0.28) 0%, rgba(56, 189, 248, 0.2) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .mission-card h3 {
-  font-size: 1.25rem;
+  font-family: 'Space Grotesk', Inter, system-ui, sans-serif;
+  font-size: 1.3rem;
   font-weight: 600;
-  margin: 0 0 12px 0;
+  margin: 0;
   color: white;
+  letter-spacing: -0.01em;
 }
 
 .mission-card p {
-  color: var(--muted);
-  line-height: 1.6;
-  font-size: 0.95rem;
+  color: #b7c5df;
+  line-height: 1.72;
+  font-size: 0.98rem;
   margin: 0;
+}
+
+.mission-chip {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  color: #dbeafe;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.mission-card:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.mission-card:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+@keyframes missionRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 1024px) {
+  .mission-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mission-card {
+    min-height: 260px;
+  }
 }
 
 .hero-inner {
@@ -493,11 +612,25 @@ textarea,
   }
 
   .mission-header h2 {
-    font-size: 2rem;
+    font-size: 2.05rem;
   }
 
   .mission {
-    padding: 60px 20px;
+    padding: 72px 0 86px;
+  }
+
+  .mission-header {
+    margin-bottom: 42px;
+  }
+
+  .mission-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .mission-card {
+    min-height: 0;
+    padding: 24px 22px;
   }
 
   .nav-inner {

@@ -1109,6 +1109,101 @@ textarea,
   min-width: 250px;
 }
 
+.admin-packet-cards {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.admin-packet-cards>.hero-card {
+  max-width: none;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.packet-action-card h4 {
+  margin: 0 0 8px;
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.packet-action-card .small {
+  margin: 0 0 14px;
+  min-height: 2.2em;
+}
+
+.packet-action-card .input-field {
+  margin-bottom: 12px;
+}
+
+.packet-action-status {
+  min-height: 22px;
+  margin: 2px 0 10px;
+  font-size: 0.9rem;
+}
+
+.packet-action-card .btn {
+  margin-top: auto;
+}
+
+.packet-remove-card {
+  background-color: rgba(112, 105, 247, 0.03);
+}
+
+.packet-status-card {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.packet-status-btn {
+  background-color: #3b82f6;
+  border: 1px solid #3b82f6;
+}
+
+.packet-remove-captcha {
+  margin-top: 2px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px dashed var(--accent);
+  border-radius: 8px;
+}
+
+.packet-remove-captcha-label {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.packet-remove-captcha-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.packet-captcha-pill {
+  min-width: 92px;
+  padding: 5px 15px;
+  font-weight: 700;
+  text-align: center;
+  background: rgba(112, 105, 247, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.packet-captcha-input {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+@media (max-width: 1100px) {
+  .admin-packet-cards {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+
 /* 3-Block Layout for Assignment */
 .assignment-grid {
   display: grid;
@@ -1177,6 +1272,10 @@ textarea,
 @media (max-width: 768px) {
   .dashboard-cards {
     flex-direction: column;
+  }
+
+  .admin-packet-cards {
+    grid-template-columns: 1fr;
   }
 
   .dashboard-cards>.hero-card {

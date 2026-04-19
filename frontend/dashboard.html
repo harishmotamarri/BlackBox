@@ -27,61 +27,49 @@
                 <h3 style="color: orange;" id="welcomeMsg">Welcome, Admin</h3>
                 <p class="hero-sub">You have secure access to this system.</p>
 
-                <br>
-
                 <!-- Action Cards Container -->
-                <!-- Action Cards Container -->
-                <!-- Action Cards Container -->
-                <div class="dashboard-cards">
+                <div class="dashboard-cards admin-packet-cards">
 
                     <!-- 1. Register Packet -->
-                    <div class="hero-card">
+                    <div class="hero-card packet-action-card">
                         <h4>Register New Packet</h4>
                         <p class="small">Add a new BlackBox.</p>
-                        <br>
                         <input id="newPacketId" class="input-field" placeholder="Packet ID" />
-                        <input id="registeredNumber" class="input-field" placeholder="A9G Number"
-                            style="margin-top: 10px;" />
+                        <input id="registeredNumber" class="input-field" placeholder="A9G Number" />
 
-                        <div id="regStatus" class="status"></div>
+                        <div id="regStatus" class="status packet-action-status"></div>
                         <button id="registerBtn" class="btn btn-primary btn-full">Register Packet</button>
                     </div>
 
                     <!-- 2. Remove Packet -->
-                    <div class="hero-card" style="background-color: rgba(112, 105, 247, 0.03);">
+                    <div class="hero-card packet-action-card packet-remove-card">
                         <h4>Remove Packet</h4>
                         <p class="small">Permanently delete a BlackBox.</p>
-                        <br>
                         <input id="removePacketId" class="input-field" placeholder="Packet ID to Remove" />
 
                         <!-- Anti-accidental Removal CAPTCHA -->
-                        <div id="captchaArea"
-                            style="margin-top: 15px; padding: 12px; border: 1px dashed var(--accent); border-radius: 8px;">
-                            <label class="small" style="color: var(--accent); font-weight: 600;">Security
+                        <div id="captchaArea" class="packet-remove-captcha">
+                            <label class="small packet-remove-captcha-label">Security
                                 Validation</label>
-                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                                <div id="captchaText" class="admin"
-                                    style="padding: 5px 15px; font-weight: 700; background: rgba(112, 105, 247, 0.1); border-color: var(--accent); color: var(--accent); min-width: 80px; text-align: center;">
+                            <div class="packet-remove-captcha-row">
+                                <div id="captchaText" class="admin packet-captcha-pill">
                                     --</div>
-                                <input id="captchaInput" class="input-field" placeholder="Answer"
-                                    style="margin-bottom: 0; flex: 1;" />
+                                <input id="captchaInput" class="input-field packet-captcha-input" placeholder="Answer" />
                             </div>
                         </div>
 
-                        <div id="removeStatus" class="status"></div>
-                        <button id="removeBtn" class="btn btn-primary btn-full" style="margin-top: 15px;">Remove
+                        <div id="removeStatus" class="status packet-action-status"></div>
+                        <button id="removeBtn" class="btn btn-primary btn-full">Remove
                             Packet</button>
                     </div>
 
                     <!-- 3. Check Status -->
-                    <div class="hero-card" style="background-color: rgba(59, 130, 246, 0.05);">
+                    <div class="hero-card packet-action-card packet-status-card">
                         <h4>Check Status</h4>
                         <p class="small">View detailed packet info.</p>
-                        <br>
                         <input id="checkPacketId" class="input-field" placeholder="Packet ID" />
-                        <div id="checkStatus" class="status"></div>
-                        <button id="checkStatusBtn" class="btn btn-primary btn-full"
-                            style="background-color: #3b82f6; border-color: #3b82f6;">Check Status</button>
+                        <div id="checkStatus" class="status packet-action-status"></div>
+                        <button id="checkStatusBtn" class="btn btn-primary btn-full packet-status-btn">Check Status</button>
                     </div>
                 </div>
 

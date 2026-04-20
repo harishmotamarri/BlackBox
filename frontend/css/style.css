@@ -1151,11 +1151,11 @@ textarea,
 }
 
 .packet-remove-card {
-  background-color: rgba(112, 105, 247, 0.03);
+  background-color: rgba(2, 6, 23, 0.8);
 }
 
 .packet-status-card {
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: rgba(2, 6, 23, 0.8);
 }
 
 .packet-status-btn {

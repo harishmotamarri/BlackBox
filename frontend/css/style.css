@@ -1158,11 +1158,6 @@ textarea,
   background-color: rgba(2, 6, 23, 0.8);
 }
 
-.packet-status-btn {
-  background-color: #3b82f6;
-  border: 1px solid #3b82f6;
-}
-
 .packet-remove-captcha {
   margin-top: 2px;
   margin-bottom: 12px;

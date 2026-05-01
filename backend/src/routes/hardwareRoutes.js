@@ -29,10 +29,10 @@ async function fetchPacketOr404(packetId) {
     return data;
 }
 
-// GET /api/hardware/otp/:packetId
-// Returns the current valid OTP if exists and not expired
+// GET /api/hardware/verification-code/:packetId
+// Returns the current verification code if it exists and is still valid
 router.get(
-    '/otp/:packetId',
+    '/verification-code/:packetId',
     asyncHandler(async (req, res) => {
         const { packetId } = req.params;
 
@@ -42,19 +42,19 @@ router.get(
 
         // Check expiry
         if (!packet.otpexpiresat || Date.now() > Number(packet.otpexpiresat)) {
-            // OTP expired or not set
-            httpError(404, 'No valid OTP');
+            // Verification code expired or not set
+            httpError(404, 'No valid verification code');
         }
 
-        // Check if OTP exists
+        // Check if verification code exists
         if (!packet.current_otp) {
-            httpError(404, 'No OTP generated');
+            httpError(404, 'No verification code generated');
         }
 
-        // Return the plain OTP
+        // Return the plain verification code
         res.json({
             success: true,
-            otp: packet.current_otp
+            verificationCode: packet.current_otp
         });
     })
 );

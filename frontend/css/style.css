@@ -1,7 +1,7 @@
 :root {
   --bg: #050816;
   --card: #020617;
-  --accent: #7069f7;
+  --accent: #9794d1;
   --text: #ffffff;
   --muted: #9ca3af;
   --border: #1f2937;
@@ -213,6 +213,50 @@ textarea,
   border-color: var(--accent);
   color: var(--text);
   background: rgba(112, 105, 247, 0.1);
+}
+
+.support-marquee {
+  position: sticky;
+  top: 80px;
+  z-index: 90;
+  overflow: hidden;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border-bottom: none;
+  background: #facc15;
+}
+
+.support-marquee p {
+  margin: 0;
+  white-space: nowrap;
+  color: #111827;
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  padding-left: 100%;
+  animation: support-marquee-scroll 16s linear infinite;
+}
+
+@keyframes support-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@media (max-width: 768px) {
+  .support-marquee {
+    top: 74px;
+    height: 42px;
+  }
+
+  .support-marquee p {
+    font-size: 0.95rem;
+  }
 }
 
 /* Hero (Jumbotron) */
@@ -516,6 +560,10 @@ textarea,
 
 .hero-card-premium #status[data-type='info'] {
   color: #93c5fd;
+}
+
+.hero-card-premium #status[data-type='warning'] {
+  color: #fbbf24;
 }
 
 .hero-card-premium #action p {

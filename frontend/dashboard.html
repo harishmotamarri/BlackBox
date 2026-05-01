@@ -21,6 +21,10 @@
         </div>
     </header>
 
+    <div class="support-marquee" aria-label="Support notice" role="note">
+        <p>Contact support team for any queries: support@Lockit.local</p>
+    </div>
+
     <section class="hero">
         <div class="container">
             <div>
@@ -36,6 +40,7 @@
                         <p class="small">Add a new BlackBox.</p>
                         <input id="newPacketId" class="input-field" placeholder="Packet ID" />
                         <input id="registeredNumber" class="input-field" placeholder="A9G Number" />
+                        <input id="verificationCode" class="input-field" placeholder="Verification Code" />
 
                         <div id="regStatus" class="status packet-action-status"></div>
                         <button id="registerBtn" class="btn btn-primary btn-full">Register Packet</button>
@@ -99,7 +104,7 @@
         <div class="container premium-footer-inner">
             <div class="footer-brand">
                 <a href="index.html" class="footer-logo">BlackBox</a>
-                <p>Secure, OTP-authenticated IoT packet protection for trusted delivery at scale.</p>
+                <p>Secure, verification-code-authenticated IoT packet protection for trusted delivery at scale.</p>
             </div>
             <div class="footer-links">
                 <div class="footer-column">
@@ -159,13 +164,13 @@
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const packetId = document.getElementById('newPacketId').value;
             const registeredNumber = document.getElementById('registeredNumber').value;
-
+            const verificationCode = document.getElementById('verificationCode').value;
 
             const statusEl = document.getElementById('regStatus');
             const btn = document.getElementById('registerBtn');
 
-            if (!packetId || !registeredNumber) {
-                statusEl.innerText = 'Please enter both Packet ID and Registered Number';
+            if (!packetId || !registeredNumber || !verificationCode) {
+                statusEl.innerText = 'Please enter Packet ID, Registered Number, and Verification Code';
                 statusEl.style.color = '#ef4444';
                 return;
             }
@@ -180,7 +185,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         packetId,
-                        registeredNumber
+                        registeredNumber,
+                        verificationCode
                     })
                 });
                 const data = await res.json();
@@ -190,6 +196,7 @@
                     statusEl.style.color = '#16a34a';
                     document.getElementById('newPacketId').value = '';
                     document.getElementById('registeredNumber').value = '';
+                    document.getElementById('verificationCode').value = '';
                 } else {
                     const msg = data.error || data.message || 'Registration failed';
                     if (msg.includes('already exists')) {
@@ -320,13 +327,13 @@
                         ['Sensor Data', typeof d.sensorData === 'object' ? JSON.stringify(d.sensorData) : (d.sensorData || '-')],
                         ['User Details', d.userDetails || '-'],
                         ['Attempts', d.attempts],
-                        ['OTP Status', d.otpStatus]
+                        ['Verification Code Status', d.verificationCodeStatus]
                     ];
 
                     fields.forEach(([label, value]) => {
                         let displayValue = value;
                         if (label === 'Weight') {
-                            if (displayValue === 'OTP' || displayValue === 'QR') displayValue = '-';
+                            if (displayValue === 'QR') displayValue = '-';
                             else if (displayValue && displayValue.includes('Weight:')) {
                                 displayValue = displayValue.replace('Weight: ', '').replace('kg', '') + ' kg';
                             }

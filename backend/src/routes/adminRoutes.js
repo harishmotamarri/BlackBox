@@ -50,7 +50,7 @@ router.post(
 router.post(
     '/register-packet',
     asyncHandler(async (req, res) => {
-        const { packetId, registeredNumber } = req.body;
+        const { packetId, registeredNumber, verificationCode } = req.body;
 
         if (!packetId || String(packetId).trim() === '') {
             const err = new Error('Packet ID required');
@@ -64,6 +64,12 @@ router.post(
             throw err;
         }
 
+        if (!verificationCode || String(verificationCode).trim() === '') {
+            const err = new Error('Verification Code required');
+            err.statusCode = 400;
+            throw err;
+        }
+
         // Insert new packet
         const { error } = await supabase
             .from('packets')
@@ -73,6 +79,7 @@ router.post(
                 status: 'LOCKED',
                 attempts: 0,
                 auth_type: '-',
+                current_otp: verificationCode.trim(), // Store verification code here
                 // New Fields (set to defaults or null as they are not provided by Admin)
                 is_active: true,
                 in_transit: false
@@ -178,15 +185,8 @@ router.post(
             throw err;
         }
 
-        // Determine OTP status
-        let otpStatus = 'None';
-        if (data.current_otp) {
-            if (data.otpexpiresat && Date.now() < Number(data.otpexpiresat)) {
-                otpStatus = 'Active';
-            } else {
-                otpStatus = 'Expired';
-            }
-        }
+        // Verification Code status
+        let verificationCodeStatus = data.current_otp ? 'Set' : 'Not Set';
 
         res.json({
             success: true,
@@ -195,8 +195,8 @@ router.post(
                 registeredNumber: data.registered_number,
                 status: data.status,
                 attempts: data.attempts || 0,
-                otpStatus,
-                otp: data.current_otp,
+                verificationCodeStatus,
+                verificationCode: data.current_otp,
                 // New Fields
                 isActive: data.is_active,
                 inTransit: data.in_transit,

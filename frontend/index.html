@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>BlackBox – Smart Security Packet</title>
+  <title>Lockit – Smart Security Packet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="stylesheet" href="css/style.css" />
@@ -17,7 +17,7 @@
 
   <header class="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="logo">BlackBox</a>
+      <a href="index.html" class="logo">Lockit</a>
       <div class="dropdown">
         <button class="dropdown-btn" type="button">Log in</button>
         <div class="dropdown-content">
@@ -28,6 +28,10 @@
     </div>
   </header>
 
+  <div class="support-marquee" aria-label="Support notice" role="note">
+    <p>Contact support team for any queries: support@Lockit.local</p>
+  </div>
+
   <section class="hero hero-home">
     <div class="container hero-inner">
 
@@ -35,7 +39,7 @@
         <p class="eyebrow">Lock it • Track it • Own it</p>
         <h1>Revolutionizing<br>Package Security<br>with IoT</h1>
         <p class="hero-sub">
-          Secure high-value deliveries using OTP-authenticated IoT locks.
+          Secure high-value deliveries using verification-code-authenticated IoT locks.
         </p>
       </div>
 
@@ -46,17 +50,16 @@
           <label class="small">Packet ID</label>
           <input id="packetId" class="input-field" />
 
+
           <div id="status" class="status"></div>
 
           <div id="action">
-            <button class="btn btn-primary btn-full" id="requestOtp" type="button">
-              Generate OTP
-            </button>
+
 
           </div>
 
           <p class="small" id="note">
-            Enter the Packet ID printed on your BlackBox.
+            Enter the Packet ID printed on your Lockit.
           </p>
         </div>
       </div>
@@ -70,7 +73,7 @@
         <p class="mission-kicker">Our Mission</p>
         <h2>Secure handoffs. Verified trust.</h2>
         <p>
-          We combine IoT hardware, OTP identity checks, and live telemetry to make every delivery
+          We combine IoT hardware, verification-code identity checks, and live telemetry to make every delivery
           provably secure from dispatch to doorstep.
         </p>
       </div>
@@ -90,7 +93,7 @@
         <article class="mission-card">
           <div class="icon" aria-hidden="true">⚡</div>
           <h3>Instant Access</h3>
-          <p>OTP-based unlock workflows that authorize the right person at the right checkpoint.</p>
+          <p>Verification-code unlock workflows that authorize the right person at the right checkpoint.</p>
           <span class="mission-chip">Zero Delay</span>
         </article>
       </div>
@@ -100,8 +103,8 @@
   <footer class="premium-footer">
     <div class="container premium-footer-inner">
       <div class="footer-brand">
-        <a href="index.html" class="footer-logo">BlackBox</a>
-        <p>Secure, OTP-authenticated IoT packet protection for trusted delivery at scale.</p>
+        <a href="index.html" class="footer-logo">Lockit</a>
+        <p>Secure, verification-code-authenticated IoT packet protection for trusted delivery at scale.</p>
       </div>
       <div class="footer-links">
         <div class="footer-column">
@@ -117,19 +120,19 @@
         </div>
         <div class="footer-column">
           <h4>Support</h4>
-          <a href="mailto:support@blackbox.local">support@blackbox.local</a>
+          <a href="mailto:support@Lockit.local">support@Lockit.local</a>
           <p class="footer-small">Mon-Sat | 09:00 - 18:00 IST</p>
         </div>
       </div>
     </div>
     <div class="container premium-footer-bottom">
-      <p>&copy; 2026 BlackBox Systems. All rights reserved.</p>
+      <p>&copy; 2026 Lockit Systems. All rights reserved.</p>
       <p class="footer-small">Built for secure logistics and verified delivery handoff.</p>
     </div>
   </footer>
 
-    <script src="js/navigation.js"></script>
-    <script type="module" src="js/app.js"></script>
+  <script src="js/navigation.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 
 </html>

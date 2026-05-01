@@ -1,11 +1,9 @@
 const express = require('express');
 const { supabase } = require('../db/database');
-const { generateOtp, hashOtp, safeEqualHex } = require('../utils/otp');
 const { ensureLockTimeout, ADDED_AUTO_LOCK_DELAY_MS } = require('../utils/packetUtils');
 
 const router = express.Router();
 
-const OTP_TTL_MS = Number(process.env.OTP_TTL_MS || 5 * 60 * 1000);
 const MAX_ATTEMPTS = Number(process.env.MAX_ATTEMPTS || 3);
 
 const asyncHandler = (fn) => (req, res, next) =>
@@ -20,6 +18,12 @@ function httpError(statusCode, message) {
 function requireField(val, name) {
   if (val === undefined || val === null || String(val).trim() === '') {
     httpError(400, `${name} required`);
+  }
+}
+
+function requireAlphanumeric(val, name) {
+  if (!/^[a-z0-9]+$/i.test(String(val).trim())) {
+    httpError(400, `${name} must be alphanumeric`);
   }
 }
 
@@ -42,70 +46,27 @@ async function fetchPacketOr404(packetId) {
 }
 
 function blockIfTampered(packet) {
-  if (packet.status === 'TAMPERED') httpError(403, 'Packet tampered');
+  if (packet.status === 'TAMPERED') httpError(403, 'Tamper alert: packet already tampered');
 }
 
 function blockIfUnlocked(packet) {
   if (packet.status === 'UNLOCKED') httpError(409, 'Packet is already unlocked');
 }
 
-// POST /api/packet/request-otp
+// POST /api/packet/verify-code
 router.post(
-  '/request-otp',
+  '/verify-code',
   asyncHandler(async (req, res) => {
-    const { packetId } = req.body;
+    const { packetId, verificationCode } = req.body;
     requireField(packetId, 'Packet ID');
+    requireField(verificationCode, 'Verification Code');
+    requireAlphanumeric(verificationCode, 'Verification Code');
 
     const packet = await fetchPacketOr404(packetId);
     blockIfTampered(packet);
     blockIfUnlocked(packet);
 
-    const otp = generateOtp();
-    const otpHash = hashOtp(otp);
-
-    // DEMO LOGGING: Send to client instead of server console
-    // console.error(...) removed
-
-    const expiresAt = Date.now() + OTP_TTL_MS;
-
-    const { error } = await supabase
-      .from('packets')
-      .update({
-        otphash: otpHash,
-        current_otp: otp,
-        otpexpiresat: expiresAt,
-        attempts: 0
-      })
-      .eq('packetid', packetId);
-
-    if (error) {
-      console.error('Supabase update error:', error);
-      httpError(500, 'Failed to update packet');
-    }
-
-    // Send OTP to client for demo purposes
-    res.json({ success: true, message: 'OTP generated', otp });
-  })
-);
-
-// POST /api/packet/verify-otp
-router.post(
-  '/verify-otp',
-  asyncHandler(async (req, res) => {
-    const { packetId, otp } = req.body;
-    requireField(packetId, 'Packet ID');
-    requireField(otp, 'OTP');
-
-    const packet = await fetchPacketOr404(packetId);
-    blockIfTampered(packet);
-
-    if (!packet.otpexpiresat || Date.now() > Number(packet.otpexpiresat)) {
-      httpError(410, 'OTP expired');
-    }
-
-    const enteredHash = hashOtp(otp);
-
-    if (!safeEqualHex(packet.otphash || '', enteredHash)) {
+    if (packet.current_otp !== verificationCode) {
       const attempts = (packet.attempts || 0) + 1;
       const tamperedNow = attempts >= MAX_ATTEMPTS;
 
@@ -117,8 +78,8 @@ router.post(
         })
         .eq('packetid', packetId);
 
-      if (tamperedNow) httpError(403, 'Tamper detected');
-      httpError(401, 'Invalid OTP');
+      if (tamperedNow) httpError(403, 'Tamper alert: too many invalid attempts');
+      httpError(401, 'Invalid Verification Code');
     }
 
     // Success
@@ -127,7 +88,7 @@ router.post(
       .update({ status: 'VERIFIED', attempts: 0 })
       .eq('packetid', packetId);
 
-    res.json({ success: true, message: 'OTP verified' });
+    res.json({ success: true, message: 'Verification Code valid' });
   })
 );
 
@@ -139,6 +100,14 @@ router.post(
     requireField(packetId, 'Packet ID');
 
     const packet = await fetchPacketOr404(packetId);
+
+    if (packet.status === 'UNLOCKED') {
+      return res.json({
+        success: true,
+        alreadyUnlocked: true,
+        message: 'Packet is already unlocked'
+      });
+    }
 
     if (packet.status !== 'VERIFIED') {
       httpError(403, 'Unauthorized');

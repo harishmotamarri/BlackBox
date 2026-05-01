@@ -7,7 +7,6 @@ async function post(endpoint, body) {
     body: JSON.stringify(body)
   });
 
-  // Read as text first to avoid JSON crashes on HTML/server errors
   const text = await res.text();
   let data;
   try {
@@ -39,8 +38,8 @@ async function get(endpoint) {
 }
 
 export const api = {
-  requestOtp: (packetId) => post('/request-otp', { packetId }),
-  verifyOtp: (packetId, otp) => post('/verify-otp', { packetId, otp }),
+  verifyCode: (packetId, verificationCode) => post('/verify-code', { packetId, verificationCode }),
   unlock: (packetId) => post('/unlock', { packetId }),
+  checkPacket: (packetId) => get(`/status/${encodeURIComponent(packetId)}`),
   status: (packetId) => get(`/status/${encodeURIComponent(packetId)}`)
 };

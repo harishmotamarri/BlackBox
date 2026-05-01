@@ -1,67 +1,113 @@
 import { api } from './api.js';
-import { $, setStatus, clearStatus, renderRequestOtpView, renderVerifyOtpView, renderUnlockedView } from './ui.js';
+import { $, setStatus, clearStatus, renderDefaultView, renderUnlockedView, renderVerificationView, renderTamperedView } from './ui.js';
 
 function getPacketId() {
   const input = $('packetId');
   return input ? input.value.trim() : '';
 }
 
-function getOtp() {
-  const input = $('otp');
+function getCode() {
+  const input = $('verificationCode');
   return input ? input.value.trim() : '';
 }
 
-async function onRequestOtp() {
+function isAlphanumeric(value) {
+  return /^[a-z0-9]+$/i.test(value);
+}
+
+function setPacketIdDisabled(disabled) {
+  const input = $('packetId');
+  if (input) input.disabled = disabled;
+}
+
+function enterTamperedState(message) {
+  clearStatus();
+  setStatus(message || 'Tamper alert: too many invalid attempts', 'warning');
+  setPacketIdDisabled(true);
+
+  const inputCode = $('verificationCode');
+  if (inputCode) inputCode.disabled = true;
+
+  renderTamperedView();
+  wireDynamicButtons();
+}
+
+async function onCheckPacketId() {
   clearStatus();
 
   const packetId = getPacketId();
+
   if (!packetId) {
-    setStatus('Please enter Packet ID', 'error');
+    setStatus('Enter Packet ID', 'error');
     return;
   }
 
   try {
-    setStatus('Generating OTP…', 'info');
-    const res = await api.requestOtp(packetId);
+    setStatus('Checking Packet ID…', 'info');
+    const packet = await api.checkPacket(packetId);
 
-    // Log OTP to console for the user
-    if (res.otp) {
-      console.log(`%c OTP for ${packetId}: ${res.otp} `, 'background: #222; color: #bada55; font-size: 16px; padding: 4px; border-radius: 4px;');
+    if (packet && packet.data && packet.data.status === 'TAMPERED') {
+      enterTamperedState('Tamper alert: packet already tampered');
+      return;
     }
 
-    setStatus('OTP generated.', 'success');
+    if (packet && packet.data && packet.data.status === 'UNLOCKED') {
+      setStatus('Packet is already unlocked.', 'success');
+      setPacketIdDisabled(true);
+      renderUnlockedView(packetId);
+      wireDynamicButtons();
+      return;
+    }
 
-    // Disable Packet ID input
-    const input = $('packetId');
-    if (input) input.disabled = true;
-
-    renderVerifyOtpView(packetId);
+    setStatus('Packet ID verified. Enter your Verification ID.', 'success');
+    setPacketIdDisabled(true);
+    renderVerificationView();
     wireDynamicButtons();
   } catch (e) {
     setStatus(e.message, 'error');
   }
 }
 
-async function onVerifyOtp() {
+async function onVerifyAndUnlock() {
   clearStatus();
 
   const packetId = getPacketId();
-  const otp = getOtp();
+  const code = getCode();
 
-  if (!packetId || !otp) {
-    setStatus('Enter both Packet ID and OTP', 'error');
+  if (!packetId) {
+    setStatus('Enter Packet ID', 'error');
+    return;
+  }
+
+  if (!code) {
+    setStatus('Enter Verification ID', 'error');
+    return;
+  }
+
+  if (!isAlphanumeric(code)) {
+    setStatus('Verification ID must be alphanumeric', 'error');
     return;
   }
 
   try {
-    setStatus('Verifying OTP…', 'info');
-    await api.verifyOtp(packetId, otp);
-    setStatus('OTP verified. Unlocking…', 'success');
+    setStatus('Verifying ID…', 'info');
+    await api.verifyCode(packetId, code);
+    setStatus('Verification ID verified. Unlocking…', 'success');
     await api.unlock(packetId);
     setStatus('Package is now Unlocked ', 'success');
+
+    setPacketIdDisabled(true);
+    const inputCode = $('verificationCode');
+    if (inputCode) inputCode.disabled = true;
+
     renderUnlockedView(packetId);
     wireDynamicButtons();
   } catch (e) {
+    if (/tamper/i.test(e.message || '')) {
+      enterTamperedState(e.message);
+      return;
+    }
+
     setStatus(e.message, 'error');
   }
 }
@@ -69,49 +115,52 @@ async function onVerifyOtp() {
 function onRestart() {
   clearStatus();
 
-  const input = $('packetId');
-  if (input) {
-    input.disabled = false;
-    input.value = '';
+  const inputId = $('packetId');
+  if (inputId) {
+    inputId.disabled = false;
+    inputId.value = '';
   }
 
-  renderRequestOtpView();
+  const inputCode = $('verificationCode');
+  if (inputCode) {
+    inputCode.disabled = false;
+    inputCode.value = '';
+  }
+
+  renderDefaultView();
   wireDynamicButtons();
 }
 
 function wireDynamicButtons() {
-  const requestOtpBtn = $('requestOtp');
-  if (requestOtpBtn) requestOtpBtn.onclick = onRequestOtp;
+  const checkBtn = $('checkPacketBtn');
+  if (checkBtn) checkBtn.onclick = onCheckPacketId;
 
-  const verifyOtpBtn = $('verifyOtp');
-  if (verifyOtpBtn) verifyOtpBtn.onclick = onVerifyOtp;
+  const verifyBtn = $('verifyBtn');
+  if (verifyBtn) verifyBtn.onclick = onVerifyAndUnlock;
 
   const restartBtn = $('restart');
   if (restartBtn) restartBtn.onclick = onRestart;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Ensure initial UI is correct even if HTML changes
-  renderRequestOtpView();
+  renderDefaultView();
   wireDynamicButtons();
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       const el = document.activeElement;
-      // If the user already focused a button, let the browser handle the click
       if (el && el.tagName === 'BUTTON') return;
 
-      const requestBtn = $('requestOtp');
-      const verifyBtn = $('verifyOtp');
+      const checkBtn = $('checkPacketBtn');
+      const verifyBtn = $('verifyBtn');
       const restartBtn = $('restart');
 
-      if (verifyBtn) {
-        // Prevent default form submission if any, and trigger click
+      if (checkBtn) {
+        e.preventDefault();
+        checkBtn.click();
+      } else if (verifyBtn) {
         e.preventDefault();
         verifyBtn.click();
-      } else if (requestBtn) {
-        e.preventDefault();
-        requestBtn.click();
       } else if (restartBtn) {
         e.preventDefault();
         restartBtn.click();

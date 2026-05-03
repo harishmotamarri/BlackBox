@@ -69,7 +69,7 @@ export function renderTamperedView() {
   if (!action) return;
   action.innerHTML = `
     <button class="btn btn-primary btn-full" id="restart" type="button">
-      Return to Start
+      Unlock another packet
     </button>
   `;
 }

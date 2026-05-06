@@ -213,4 +213,111 @@ router.post(
     })
 );
 
+// GET /api/admin/all-packets
+router.get(
+    '/all-packets',
+    asyncHandler(async (req, res) => {
+        const { data, error } = await supabase
+            .from('packets')
+            .select('*');
+
+        if (error) {
+            console.error('Supabase fetch all packets error:', error);
+            const err = new Error('Database error');
+            err.statusCode = 500;
+            throw err;
+        }
+
+        res.json({
+            success: true,
+            data: data
+        });
+    })
+);
+
+// POST /api/admin/master-lock
+router.post(
+    '/master-lock',
+    asyncHandler(async (req, res) => {
+        const { packetId } = req.body;
+        if (!packetId) {
+            const err = new Error('Packet ID required');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        const { error } = await supabase
+            .from('packets')
+            .update({ status: 'LOCKED', attempts: 0 })
+            .eq('packetid', packetId.trim());
+
+        if (error) {
+            const err = new Error('Database error');
+            err.statusCode = 500;
+            throw err;
+        }
+
+        res.json({ success: true, message: 'Packet Master Locked' });
+    })
+);
+
+// POST /api/admin/master-unlock
+router.post(
+    '/master-unlock',
+    asyncHandler(async (req, res) => {
+        const { packetId } = req.body;
+        if (!packetId) {
+            const err = new Error('Packet ID required');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        const { error } = await supabase
+            .from('packets')
+            .update({ status: 'UNLOCKED', attempts: 0 })
+            .eq('packetid', packetId.trim());
+
+        if (error) {
+            const err = new Error('Database error');
+            err.statusCode = 500;
+            throw err;
+        }
+
+        res.json({ success: true, message: 'Packet Master Unlocked' });
+    })
+);
+
+// POST /api/admin/update-sensors
+router.post(
+    '/update-sensors',
+    asyncHandler(async (req, res) => {
+        const { packetId, action } = req.body;
+        if (!packetId || !action) {
+            const err = new Error('Packet ID and action required');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        let newSensorData = '-';
+        if (action === 'recalibrate') {
+            newSensorData = { status: 'recalibrated', lastCalibration: new Date().toISOString() };
+        } else if (action === 'turn_off') {
+            newSensorData = null; // or '-' depending on your db schema, null is usually fine for JSONB or TEXT. We'll use '-' to match existing logic
+        }
+
+        const { error } = await supabase
+            .from('packets')
+            .update({ sensor_data: newSensorData === null ? '-' : newSensorData })
+            .eq('packetid', packetId.trim());
+
+        if (error) {
+            const err = new Error('Database error');
+            err.statusCode = 500;
+            throw err;
+        }
+
+        res.json({ success: true, message: 'Sensors updated successfully' });
+    })
+);
+
 module.exports = router;

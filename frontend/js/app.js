@@ -47,7 +47,7 @@ async function onCheckPacketId() {
     const packet = await api.checkPacket(packetId);
 
     if (packet && packet.data && packet.data.status === 'TAMPERED') {
-      enterTamperedState('Tamper alert: packet already tampered');
+      enterTamperedState('Invalid Packet');
       return;
     }
 

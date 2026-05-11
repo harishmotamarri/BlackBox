@@ -35,17 +35,12 @@
                 <div class="hero-card"
                     style="flex: 1; min-width: 150px; text-align: center; padding: 15px; border-radius: 15px;">
                     <div class="small">In Inventory</div>
-                    <div id="statActive" style="font-size: 1.5rem; font-weight: 700; color: #7069f7;">--</div>
+                    <div id="statLocked" style="font-size: 1.5rem; font-weight: 700; color: orange;">--</div>
                 </div>
                 <div class="hero-card"
                     style="flex: 1; min-width: 150px; text-align: center; padding: 15px; border-radius: 15px;">
                     <div class="small">In Transit</div>
                     <div id="statTransit" style="font-size: 1.5rem; font-weight: 700; color: #3b82f6;">--</div>
-                </div>
-                <div class="hero-card"
-                    style="flex: 1; min-width: 150px; text-align: center; padding: 15px; border-radius: 15px;">
-                    <div class="small">Locked Packets</div>
-                    <div id="statLocked" style="font-size: 1.5rem; font-weight: 700; color: orange;">--</div>
                 </div>
             </div>
 
@@ -96,12 +91,24 @@
                         <div class="assignment-block">
                             <h5>2. Customer Details</h5>
                             <div class="input-group">
-                                <label>Full Name</label>
+                                <label>Username</label>
                                 <input id="userName" class="input-field" placeholder="Hemanth" />
                             </div>
                             <div class="input-group">
-                                <label>Mobile Number</label>
+                                <label>Phone Number</label>
                                 <input id="userPhone" class="input-field" placeholder="+91 XXXX XXXX" />
+                            </div>
+                            <div class="input-group">
+                                <label>Platform Ordered</label>
+                                <input id="platformOrdered" class="input-field" placeholder="Amazon/Flipkart" />
+                            </div>
+                            <div class="input-group">
+                                <label>Payment ID</label>
+                                <input id="paymentId" class="input-field" placeholder="PAY-12345" />
+                            </div>
+                            <div class="input-group">
+                                <label>Order Date</label>
+                                <input type="date" id="orderDate" class="input-field" />
                             </div>
                             <div class="input-group">
                                 <label>Shipping Address</label>
@@ -318,6 +325,9 @@
 
             const userName = document.getElementById('userName').value;
             const userPhone = document.getElementById('userPhone').value;
+            const platformOrdered = document.getElementById('platformOrdered').value;
+            const paymentId = document.getElementById('paymentId').value;
+            const orderDate = document.getElementById('orderDate').value;
             const shippingAddr = document.getElementById('shippingAddr').value;
 
             const sellerName = document.getElementById('sellerName').value;
@@ -329,6 +339,9 @@
             const userDetails = `
 Product: ${productName} (Price: $${productPrice})
 Customer: ${userName} (${userPhone})
+Platform Ordered: ${platformOrdered}
+Payment ID: ${paymentId}
+Order Date: ${orderDate}
 Addr: ${shippingAddr}
 Seller: ${sellerName} (${sellerContact})
 Battery at Start: ${estBattery}
@@ -375,6 +388,9 @@ Battery at Start: ${estBattery}
                     document.getElementById('packetId').value = '';
                     document.getElementById('userName').value = '';
                     document.getElementById('userPhone').value = '';
+                    document.getElementById('platformOrdered').value = '';
+                    document.getElementById('paymentId').value = '';
+                    document.getElementById('orderDate').value = '';
                     document.getElementById('packetWeight').value = '';
                     document.getElementById('fromLocation').value = '';
                     document.getElementById('toLocation').value = '';

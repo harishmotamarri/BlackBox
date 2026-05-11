@@ -3,17 +3,352 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>BlackBox – Admin Dashboard</title>
+    <title>Lockit – Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="css/style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== Admin Dashboard Premium Overrides ===== */
+
+        /* Stats row cards */
+        .admin-stat-card {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 20px 15px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.7) 0%, rgba(2, 6, 23, 0.85) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--stat-accent, #7069f7), transparent);
+            opacity: 0.7;
+        }
+        .admin-stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(148, 163, 184, 0.35);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+        }
+        .admin-stat-card .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .admin-stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        /* Action cards grid */
+        .admin-action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 1.5rem;
+        }
+        .admin-action-card {
+            background: linear-gradient(155deg, rgba(15, 23, 42, 0.8) 0%, rgba(8, 14, 33, 0.95) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 20px;
+            padding: 28px 24px;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-action-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #7069f7 0%, #38bdf8 100%);
+            opacity: 0.6;
+        }
+        .admin-action-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(129, 140, 248, 0.4);
+            box-shadow: 0 16px 40px rgba(2, 6, 23, 0.5), 0 0 20px rgba(112, 105, 247, 0.1);
+        }
+        .admin-action-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 0 0 18px;
+            color: #e2e8f0;
+            letter-spacing: -0.01em;
+        }
+        .admin-action-card .input-field {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: #e5e7eb;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-bottom: 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .admin-action-card .input-field:focus {
+            outline: none;
+            border-color: rgba(112, 105, 247, 0.6);
+            box-shadow: 0 0 0 3px rgba(112, 105, 247, 0.15);
+        }
+
+        /* Premium buttons */
+        .admin-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+            letter-spacing: 0.01em;
+        }
+        .admin-btn-primary {
+            background: linear-gradient(135deg, #4338ca 0%, #7069f7 50%, #6366f1 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(67, 56, 202, 0.35);
+        }
+        .admin-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(67, 56, 202, 0.45);
+            filter: brightness(1.06);
+        }
+        .admin-btn-danger {
+            background: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ef4444 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+        }
+        .admin-btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(220, 38, 38, 0.4);
+        }
+        .admin-btn-success {
+            background: linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.3);
+        }
+
+        /* Premium tables */
+        .admin-table-wrap {
+            background: linear-gradient(155deg, rgba(15, 23, 42, 0.6) 0%, rgba(8, 14, 33, 0.85) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 2rem;
+            backdrop-filter: blur(8px);
+        }
+        .admin-table-wrap h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            color: #e5e7eb;
+            font-size: 0.88em;
+        }
+        .admin-table thead tr {
+            background: rgba(112, 105, 247, 0.08);
+        }
+        .admin-table thead th {
+            padding: 12px 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: 0.78em;
+            color: #94a3b8;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            text-align: left;
+        }
+        .admin-table tbody tr {
+            transition: background 0.2s;
+        }
+        .admin-table tbody tr:hover {
+            background: rgba(112, 105, 247, 0.06);
+        }
+        .admin-table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        .status-badge-locked {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+        }
+        .status-badge-unlocked {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+        .status-badge-tampered {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            animation: tamperPulse 1.5s ease-in-out infinite;
+        }
+        .status-badge-verified {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+        @keyframes tamperPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Master control buttons */
+        .master-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .master-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .master-btn:hover { transform: translateY(-2px); }
+        .master-btn-lock {
+            background: linear-gradient(135deg, #991b1b, #ef4444);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.3);
+        }
+        .master-btn-unlock {
+            background: linear-gradient(135deg, #065f46, #10b981);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Search input */
+        .admin-search {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            padding: 8px 14px;
+            color: #e5e7eb;
+            font-size: 0.88rem;
+            width: 260px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .admin-search:focus {
+            outline: none;
+            border-color: rgba(112, 105, 247, 0.5);
+            box-shadow: 0 0 0 3px rgba(112, 105, 247, 0.12);
+        }
+
+        /* Captcha pill */
+        .captcha-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(112, 105, 247, 0.15), rgba(56, 189, 248, 0.1));
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            color: #c7d2fe;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.04em;
+        }
+
+        /* Section header bar */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Welcome banner */
+        .admin-welcome {
+            margin-bottom: 2rem;
+        }
+        .admin-welcome h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 4px;
+        }
+        .admin-welcome p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Stats row */
+        .admin-stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 2rem;
+        }
+
+        /* Tamper alert banner */
+        .tamper-alert-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(245, 158, 11, 0.1));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 1.5rem;
+            color: #fca5a5;
+            font-weight: 600;
+            font-size: 0.9rem;
+            animation: tamperPulse 2s ease-in-out infinite;
+        }
+    </style>
 </head>
 
 <body>
 
     <header class="nav">
         <div class="container nav-inner">
-            <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">BlackBox-Admin</a>
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">Lockit-Admin</a>
             <div style="display: flex; gap: 1rem; align-items: center;">
 
                 <button id="logoutBtn" class="admin">Logout</button>
@@ -28,68 +363,134 @@
     <section class="hero">
         <div class="container">
             <div>
-                <h3 style="color: orange;" id="welcomeMsg">Welcome, Admin</h3>
-                <p class="hero-sub">You have secure access to this system.</p>
+                <div class="admin-welcome">
+                    <h3 id="welcomeMsg">Welcome, Admin</h3>
+                    <p>Secure system access — manage packets, monitor status, and control devices.</p>
+                </div>
 
-                <!-- Action Cards Container -->
-                <div class="dashboard-cards admin-packet-cards">
-
-                    <!-- 1. Register Packet -->
-                    <div class="hero-card packet-action-card">
-                        <h4>Register New Packet</h4>
-                        <p class="small">Add a new BlackBox.</p>
-                        <input id="newPacketId" class="input-field" placeholder="Packet ID" />
-                        <input id="registeredNumber" class="input-field" placeholder="A9G Number" />
-                        <input id="verificationCode" class="input-field" placeholder="Verification Code" />
-
-                        <div id="regStatus" class="status packet-action-status"></div>
-                        <button id="registerBtn" class="btn btn-primary btn-full">Register Packet</button>
+                <!-- System Stats Row -->
+                <div class="admin-stats-row">
+                    <div class="admin-stat-card" style="--stat-accent: #7069f7;">
+                        <div class="stat-label">Inventory</div>
+                        <div class="stat-value" id="statActive" style="color: #a78bfa;">--</div>
                     </div>
-
-                    <!-- 2. Remove Packet -->
-                    <div class="hero-card packet-action-card packet-remove-card">
-                        <h4>Remove Packet</h4>
-                        <p class="small">Permanently delete a BlackBox.</p>
-                        <input id="removePacketId" class="input-field" placeholder="Packet ID to Remove" />
-
-                        <!-- Anti-accidental Removal CAPTCHA -->
-                        <div id="captchaArea" class="packet-remove-captcha">
-                            <label class="small packet-remove-captcha-label">Security
-                                Validation</label>
-                            <div class="packet-remove-captcha-row">
-                                <div id="captchaText" class="admin packet-captcha-pill">
-                                    --</div>
-                                <input id="captchaInput" class="input-field packet-captcha-input" placeholder="Answer" />
-                            </div>
-                        </div>
-
-                        <div id="removeStatus" class="status packet-action-status"></div>
-                        <button id="removeBtn" class="btn btn-primary btn-full">Remove
-                            Packet</button>
+                    <div class="admin-stat-card" style="--stat-accent: #7069f7;">
+                        <div class="stat-label">In Transit</div>
+                        <div class="stat-value" id="statTransit" style="color: #a78bfa;">--</div>
                     </div>
-
-                    <!-- 3. Check Status -->
-                    <div class="hero-card packet-action-card packet-status-card">
-                        <h4>Check Status</h4>
-                        <p class="small">View detailed packet info.</p>
-                        <input id="checkPacketId" class="input-field" placeholder="Packet ID" />
-                        <div id="checkStatus" class="status packet-action-status"></div>
-                        <button id="checkStatusBtn" class="btn btn-primary btn-full packet-status-btn">Check Status</button>
+                    <div class="admin-stat-card" style="--stat-accent: #7069f7;">
+                        <div class="stat-label">Partner Inventory</div>
+                        <div class="stat-value" id="statLocked" style="color: #a78bfa;">--</div>
+                    </div>
+                    <div class="admin-stat-card" style="--stat-accent: #7069f7;">
+                        <div class="stat-label">Total</div>
+                        <div class="stat-value" id="statTotal" style="color: #a78bfa;">--</div>
                     </div>
                 </div>
 
-                <!-- Detailed Status Table -->
-                <div id="statusResultSection" style="margin-top: 3rem; display: none;">
-                    <h4 style="text-align: center; margin-bottom: 1rem;">Packet Details</h4>
+                <!-- Action Cards Container -->
+                <div class="admin-action-grid">
+
+                    <!-- 1. Register Packet -->
+                    <div class="admin-action-card">
+                        <h3>📦 Register New Packet</h3>
+                        <input id="newPacketId" class="input-field" placeholder="Packet ID" />
+                        <input id="registeredNumber" class="input-field" placeholder="A9G Number" />
+                        <input id="verificationCode" class="input-field" placeholder="Verification Code" />
+                        <div id="regStatus" style="min-height: 20px; margin: 8px 0; font-size: 0.85rem; font-weight: 600;"></div>
+                        <button id="registerBtn" class="admin-btn admin-btn-primary">Register Packet</button>
+                    </div>
+
+                    <!-- 2. Remove Packet -->
+                    <div class="admin-action-card">
+                        <h3>🗑️ Remove Packet</h3>
+                        <input id="removePacketId" class="input-field" placeholder="Packet ID to Remove" />
+                        <div style="margin: 10px 0;">
+                            <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; font-weight: 600;">Security Validation</label>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
+                                <div id="captchaText" class="captcha-pill">--</div>
+                                <input id="captchaInput" class="input-field" placeholder="Answer" style="margin-bottom: 0; flex: 1;" />
+                            </div>
+                        </div>
+                        <div id="removeStatus" style="min-height: 20px; margin: 8px 0; font-size: 0.85rem; font-weight: 600;"></div>
+                        <button id="removeBtn" class="admin-btn admin-btn-danger">Remove Packet</button>
+                    </div>
+
+                    <!-- 3. Show All Packets -->
+                    <div class="admin-action-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <h3>📋 All Packets</h3>
+                        <p style="color: #94a3b8; font-size: 0.88rem; margin: 0 0 18px;">View all registered packets, search and inspect detailed reports.</p>
+                        <button id="showAllPacketsBtn" class="admin-btn admin-btn-primary">Show All Packets</button>
+                    </div>
+                </div>
+
+                <!-- All Packets Table -->
+                <div id="allPacketsSection" class="admin-table-wrap" style="display: none;">
+                    <div class="section-header">
+                        <h4>📋 All Packets</h4>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="searchPacketsInput" class="admin-search" placeholder="Search by Packet ID..." />
+                            <button id="refreshPacketsBtn" class="master-btn" style="background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; box-shadow: 0 4px 14px rgba(67,56,202,0.3);">Refresh</button>
+                        </div>
+                    </div>
                     <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; color: #e5e7eb; font-size: 0.9em;">
+                        <table class="admin-table">
                             <thead>
-                                <tr style="background: rgba(255,255,255,0.1); text-align: left;">
-                                    <th style="padding: 10px;">Field</th>
-                                    <th style="padding: 10px;">Value</th>
+                                <tr>
+                                    <th>Index</th>
+                                    <th>Packet ID</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allPacketsTableBody">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 20px;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- Detailed Status Table -->
+                <div id="statusResultSection" class="admin-table-wrap" style="display: none;">
+                    <div class="section-header">
+                        <h4>🔍 Packet Details</h4>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Value</th>
                                 </tr>
                             </thead>
                             <tbody id="statusTableBody">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="master-controls" style="margin-top: 18px; justify-content: center;">
+                        <button id="masterLockBtn" class="master-btn master-btn-lock">🔒 Master Lock</button>
+                        <button id="masterUnlockBtn" class="master-btn master-btn-unlock">🔓 Master Unlock</button>
+                    </div>
+                </div>
+
+                <!-- Complete User Details Table -->
+                <div id="userDetailsSection" class="admin-table-wrap" style="display: none;">
+                    <div class="section-header">
+                        <h4>👤 Complete User Details</h4>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Detail</th>
+                                    <th>Information</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userDetailsTableBody">
                                 <!-- Rows will be injected here -->
                             </tbody>
                         </table>
@@ -103,7 +504,7 @@
     <footer class="premium-footer">
         <div class="container premium-footer-inner">
             <div class="footer-brand">
-                <a href="index.html" class="footer-logo">BlackBox</a>
+                <a href="index.html" class="footer-logo">Lockit</a>
                 <p>Secure, verification-code-authenticated IoT packet protection for trusted delivery at scale.</p>
             </div>
             <div class="footer-links">
@@ -148,11 +549,29 @@
             if (username) {
                 document.getElementById('welcomeMsg').innerText = `Welcome, ${username}`;
                 generateCaptcha();
+                fetchAdminStats();
             } else {
-                // Not logged in? Redirect home
                 window.location.href = '/';
             }
         });
+
+        async function fetchAdminStats() {
+            try {
+                const res = await fetch('/api/admin/all-packets');
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    const packets = data.data;
+                    const total = packets.length;
+                    const inTransit = packets.filter(p => p.in_transit).length;
+                    const locked = packets.filter(p => p.status === 'LOCKED').length;
+                    const active = total - inTransit;
+                    document.getElementById('statActive').innerText = String(active).padStart(2, '0');
+                    document.getElementById('statTransit').innerText = String(inTransit).padStart(2, '0');
+                    document.getElementById('statLocked').innerText = String(locked).padStart(2, '0');
+                    document.getElementById('statTotal').innerText = String(total).padStart(2, '0');
+                }
+            } catch(e) {}
+        }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('adminUser');
@@ -278,25 +697,127 @@
             }
         });
 
-        // Check Status Logic
-        document.getElementById('checkStatusBtn').addEventListener('click', async () => {
-            const packetId = document.getElementById('checkPacketId').value;
-            const statusEl = document.getElementById('checkStatus');
-            const btn = document.getElementById('checkStatusBtn');
+        // Fetch All Packets Logic
+        let allPacketsData = [];
 
-            // Reset UI
-            statusEl.innerText = '';
-            document.getElementById('statusResultSection').style.display = 'none';
+        async function fetchAllPackets() {
+            const tbody = document.getElementById('allPacketsTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Loading...</td></tr>';
+            try {
+                const res = await fetch('/api/admin/all-packets');
+                const data = await res.json();
 
-            if (!packetId) {
-                statusEl.innerText = 'Please enter Packet ID';
-                statusEl.style.color = '#ef4444';
+                if (res.ok && data.success) {
+                    allPacketsData = data.data;
+                    renderPacketsTable(allPacketsData);
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: #ef4444;">${data.message || 'Failed to fetch packets'}</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: #ef4444;">Error fetching packets</td></tr>`;
+            }
+        }
+
+        function renderPacketsTable(packets) {
+            const tbody = document.getElementById('allPacketsTableBody');
+            tbody.innerHTML = '';
+
+            if (packets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #94a3b8;">No packets found.</td></tr>';
                 return;
             }
 
-            statusEl.innerText = 'Checking...';
-            statusEl.style.color = '#9ca3af';
-            btn.disabled = true;
+            packets.forEach((pkt, index) => {
+                const statusClass = pkt.status === 'LOCKED' ? 'status-badge-locked' :
+                                    pkt.status === 'UNLOCKED' ? 'status-badge-unlocked' :
+                                    pkt.status === 'TAMPERED' ? 'status-badge-tampered' :
+                                    pkt.status === 'VERIFIED' ? 'status-badge-verified' : 'status-badge-locked';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td style="font-weight: 600;">${pkt.packetid}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${pkt.status}</span>
+                    </td>
+                    <td>
+                        <button onclick="viewDetailedReport('${pkt.packetid}')" class="master-btn" style="background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; padding: 6px 14px; font-size: 0.78em; box-shadow: 0 4px 12px rgba(67,56,202,0.25);">View Report</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('searchPacketsInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allPacketsData.filter(p => p.packetid.toLowerCase().includes(query));
+            renderPacketsTable(filtered);
+        });
+
+        document.getElementById('showAllPacketsBtn').addEventListener('click', () => {
+            document.getElementById('allPacketsSection').style.display = 'block';
+            document.getElementById('allPacketsSection').scrollIntoView({ behavior: 'smooth' });
+            fetchAllPackets();
+        });
+
+        document.getElementById('refreshPacketsBtn').addEventListener('click', () => {
+            document.getElementById('statusResultSection').style.display = 'none';
+            document.getElementById('userDetailsSection').style.display = 'none';
+            document.getElementById('searchPacketsInput').value = '';
+            fetchAllPackets();
+        });
+
+        let currentDetailedPacketId = null;
+
+        document.getElementById('masterLockBtn').addEventListener('click', async () => {
+            if (!currentDetailedPacketId) return;
+            if (!confirm(`Are you sure you want to MASTER LOCK packet ${currentDetailedPacketId}?`)) return;
+            try {
+                const res = await fetch('/api/admin/master-lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId: currentDetailedPacketId })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert('Packet Master Locked Successfully!');
+                    window.viewDetailedReport(currentDetailedPacketId);
+                    fetchAllPackets();
+                } else {
+                    alert(data.message || 'Failed to lock packet');
+                }
+            } catch (err) {
+                alert(err.message || 'Request failed');
+            }
+        });
+
+        document.getElementById('masterUnlockBtn').addEventListener('click', async () => {
+            if (!currentDetailedPacketId) return;
+            if (!confirm(`Are you sure you want to MASTER UNLOCK packet ${currentDetailedPacketId}?`)) return;
+            try {
+                const res = await fetch('/api/admin/master-unlock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId: currentDetailedPacketId })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert('Packet Master Unlocked Successfully!');
+                    window.viewDetailedReport(currentDetailedPacketId);
+                    fetchAllPackets();
+                } else {
+                    alert(data.message || 'Failed to unlock packet');
+                }
+            } catch (err) {
+                alert(err.message || 'Request failed');
+            }
+        });
+
+        // View Detailed Report Logic
+        window.viewDetailedReport = async function (packetId) {
+            currentDetailedPacketId = packetId;
+            // Reset UI
+            document.getElementById('statusResultSection').style.display = 'none';
+            document.getElementById('userDetailsSection').style.display = 'none';
 
             try {
                 const res = await fetch('/api/admin/packet-status', {
@@ -307,18 +828,16 @@
                 const data = await res.json();
 
                 if (res.ok && data.success) {
-                    statusEl.innerText = '';
                     const d = data.data;
                     const tbody = document.getElementById('statusTableBody');
                     tbody.innerHTML = '';
 
                     const fields = [
                         ['Packet ID', d.packetId],
-                        ['Registered Number', d.registeredNumber],
                         ['Status', d.status],
                         ['Is Active', d.isActive ? 'Yes' : 'No'],
                         ['In Transit', d.inTransit ? 'Yes' : 'No'],
-                        ['From Location', d.fromLocation || '-'],
+                        ['Current Location', d.fromLocation || '-'],
                         ['To Location', d.toLocation || '-'],
                         ['Packet Type', d.packetType || '-'],
                         ['Weight', d.authType || '-'],
@@ -339,11 +858,37 @@
                             }
                         }
 
+                        if (label === 'User Details' && value !== '-') {
+                            let nameStr = value;
+                            if (typeof value === 'string' && value.includes('Customer:')) {
+                                const match = value.match(/Customer:\s*([^\n]*)/);
+                                if (match) nameStr = match[1];
+                            } else if (typeof value === 'string') {
+                                nameStr = value.split('\n')[0];
+                            }
+                            
+                            displayValue = `<div style="display: flex; align-items: center; gap: 10px;">
+                                <span>${nameStr}</span>
+                                <button onclick="viewCompleteUserDetails('${encodeURIComponent(value).replace(/'/g, '%27')}')" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.8em;">View Complete User Details</button>
+                            </div>`;
+                        }
+
+                        if (label === 'Sensor Data') {
+                            const sensorsOn = value !== '-' && value !== 'null' && value !== '';
+                            displayValue = `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span>${value}</span>
+                                ${sensorsOn 
+                                    ? `<button onclick="turnOffSensorDetails()" class="master-btn" style="padding: 5px 12px; font-size: 0.78em; background: linear-gradient(135deg, #b45309, #f59e0b); color: #fff;">Turn Off Sensors</button>`
+                                    : `<button onclick="turnOnSensors()" class="master-btn" style="padding: 5px 12px; font-size: 0.78em; background: linear-gradient(135deg, #065f46, #10b981); color: #fff;">Turn On Sensors</button>`
+                                }
+                                <button onclick="recalibrateSensors()" class="master-btn" style="padding: 5px 12px; font-size: 0.78em; background: linear-gradient(135deg, #1e40af, #3b82f6); color: #fff;">Recalibrate Sensors</button>
+                            </div>`;
+                        }
+
                         const tr = document.createElement('tr');
-                        tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
                         tr.innerHTML = `
-                            <td style="padding: 10px; font-weight: 500;">${label}</td>
-                            <td style="padding: 10px; color: #9ca3af;">${displayValue}</td>
+                            <td style="font-weight: 600; color: #94a3b8;">${label}</td>
+                            <td>${displayValue}</td>
                         `;
                         tbody.appendChild(tr);
                     });
@@ -351,16 +896,114 @@
                     document.getElementById('statusResultSection').style.display = 'block';
                     document.getElementById('statusResultSection').scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    statusEl.innerText = data.error || data.message || 'Check failed';
-                    statusEl.style.color = '#ef4444';
+                    alert(data.error || data.message || 'Check failed');
                 }
             } catch (err) {
-                statusEl.innerText = err.message || 'Request failed';
-                statusEl.style.color = '#ef4444';
-            } finally {
-                btn.disabled = false;
+                alert(err.message || 'Request failed');
+            }
+        };
+
+        window.viewCompleteUserDetails = function (encodedDetails) {
+            const details = decodeURIComponent(encodedDetails);
+            const tbody = document.getElementById('userDetailsTableBody');
+            tbody.innerHTML = '';
+
+            const lines = details.split('\n');
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                const parts = line.split(':');
+                if (parts.length >= 2) {
+                    const k = parts.shift().trim();
+                    const v = parts.join(':').trim();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight: 600; color: #94a3b8;">${k}</td>
+                        <td>${v}</td>
+                    `;
+                    tbody.appendChild(tr);
+                } else {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td colspan="2" style="color: #94a3b8;">${line.trim()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            document.getElementById('userDetailsSection').style.display = 'block';
+            document.getElementById('userDetailsSection').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Call fetchAllPackets on load if logged in (removed to only show when clicked)
+        document.addEventListener('DOMContentLoaded', () => {
+            const username = localStorage.getItem('adminUser');
+            if (!username) {
+                window.location.href = '/';
             }
         });
+
+        window.turnOffSensorDetails = async function() {
+            if (!currentDetailedPacketId) return;
+            if (!confirm('Are you sure you want to turn off sensor details?')) return;
+            try {
+                const res = await fetch('/api/admin/update-sensors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId: currentDetailedPacketId, action: 'turn_off' })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    window.viewDetailedReport(currentDetailedPacketId);
+                } else {
+                    alert(data.message || 'Action failed.');
+                }
+            } catch (e) {
+                alert('Action failed: ' + e.message);
+            }
+        };
+
+        window.recalibrateSensors = async function() {
+            if (!currentDetailedPacketId) return;
+            if (!confirm('Are you sure you want to recalibrate all sensors?')) return;
+            try {
+                const res = await fetch('/api/admin/update-sensors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId: currentDetailedPacketId, action: 'recalibrate' })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    window.viewDetailedReport(currentDetailedPacketId);
+                } else {
+                    alert(data.message || 'Action failed.');
+                }
+            } catch (e) {
+                alert('Action failed: ' + e.message);
+            }
+        };
+
+        let alertedTamperedPackets = new Set();
+        async function pollTamperedPackets() {
+            try {
+                const res = await fetch('/api/admin/all-packets');
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    data.data.forEach(p => {
+                        if (p.status === 'TAMPERED' && !alertedTamperedPackets.has(p.packetid)) {
+                            alertedTamperedPackets.add(p.packetid);
+                            alert(`CRITICAL ALERT: Packet ${p.packetid} has been TAMPERED!`);
+                            if (document.getElementById('allPacketsSection').style.display === 'block') {
+                                fetchAllPackets();
+                            }
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+        
+        setInterval(pollTamperedPackets, 5000); // Poll every 5 seconds
+        pollTamperedPackets(); // Initial check
+
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {

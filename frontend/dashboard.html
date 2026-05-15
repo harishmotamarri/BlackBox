@@ -533,6 +533,19 @@
     </footer>
 
     <script src="js/navigation.js"></script>
+
+    <div id="criticalAlertModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Critical Alert</h3>
+                <button id="closeCriticalAlert" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="criticalAlertMessage">A packet has been tampered with!</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentCaptchaAnswer = null;
 
@@ -983,6 +996,18 @@
         };
 
         let alertedTamperedPackets = new Set();
+
+        function showCriticalAlert(message) {
+            document.getElementById('criticalAlertMessage').innerText = message;
+            document.getElementById('criticalAlertModal').style.display = 'flex';
+        }
+
+        function hideCriticalAlert() {
+            document.getElementById('criticalAlertModal').style.display = 'none';
+        }
+
+        document.getElementById('closeCriticalAlert').addEventListener('click', hideCriticalAlert);
+
         async function pollTamperedPackets() {
             try {
                 const res = await fetch('/api/admin/all-packets');
@@ -991,7 +1016,7 @@
                     data.data.forEach(p => {
                         if (p.status === 'TAMPERED' && !alertedTamperedPackets.has(p.packetid)) {
                             alertedTamperedPackets.add(p.packetid);
-                            alert(`CRITICAL ALERT: Packet ${p.packetid} has been TAMPERED!`);
+                            showCriticalAlert(`CRITICAL ALERT: Packet ${p.packetid} has been TAMPERED!`);
                             if (document.getElementById('allPacketsSection').style.display === 'block') {
                                 fetchAllPackets();
                             }

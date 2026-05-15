@@ -154,7 +154,7 @@ router.get(
         const stats = {
             active: data.filter(p => p.is_active).length,
             inTransit: data.filter(p => p.in_transit).length,
-            locked: data.filter(p => p.status === 'LOCKED').length
+            inInventory: data.filter(p => p.status === 'LOCKED').length
         };
 
         res.json({ success: true, stats });

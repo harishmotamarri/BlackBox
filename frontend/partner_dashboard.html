@@ -252,9 +252,8 @@
                 const res = await fetch('/api/partner/stats');
                 const data = await res.json();
                 if (res.ok && data.stats) {
-                    document.getElementById('statActive').innerText = String(data.stats.active).padStart(2, '0');
                     document.getElementById('statTransit').innerText = String(data.stats.inTransit).padStart(2, '0');
-                    document.getElementById('statLocked').innerText = String(data.stats.locked).padStart(2, '0');
+                    document.getElementById('statLocked').innerText = String(data.stats.inInventory).padStart(2, '0');
                 }
             } catch (e) {
                 console.error('Failed to fetch stats:', e);

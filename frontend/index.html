@@ -100,6 +100,76 @@
     </div>
   </section>
 
+  <section class="totp-authenticator-section">
+    <div class="container">
+      <div class="mission-header" style="margin-bottom: 30px;">
+        <p class="mission-kicker">Customer Portal</p>
+        <h2 id="portal-title">Customer Login</h2>
+        <p id="portal-desc">Access your active orders and generate security tokens to unlock your Lockit packets.</p>
+      </div>
+
+      <div class="totp-authenticator-card">
+        <!-- CUSTOMER AUTHENTICATION (SIGN IN / SIGN UP) VIEW -->
+        <div id="customer-auth-view">
+          <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tab-signin" type="button">Sign In</button>
+            <button class="auth-tab-btn" id="tab-signup" type="button">Sign Up</button>
+          </div>
+
+          <!-- Sign In Form -->
+          <form id="signinForm">
+            <label class="small" for="signinMobile">Mobile Number</label>
+            <input id="signinMobile" class="input-field" placeholder="Enter Mobile Number" type="tel" autocomplete="username" />
+
+            <label class="small" for="signinPassword">Password</label>
+            <input id="signinPassword" class="input-field" placeholder="Enter Password" type="password" autocomplete="current-password" />
+
+            <button class="btn btn-primary btn-full" type="submit" style="margin-top: 10px;">
+              Sign In
+            </button>
+          </form>
+
+          <!-- Sign Up Form -->
+          <form id="signupForm" class="hidden">
+            <label class="small" for="signupMobile">Mobile Number</label>
+            <input id="signupMobile" class="input-field" placeholder="Enter Mobile Number" type="tel" autocomplete="username" />
+
+            <label class="small" for="signupPassword">Password</label>
+            <input id="signupPassword" class="input-field" placeholder="Create Password" type="password" autocomplete="new-password" />
+
+            <label class="small" for="signupConfirmPassword">Confirm Password</label>
+            <input id="signupConfirmPassword" class="input-field" placeholder="Confirm Password" type="password" autocomplete="new-password" />
+
+            <button class="btn btn-primary btn-full" type="submit" style="margin-top: 10px;">
+              Create Account
+            </button>
+          </form>
+        </div>
+
+        <!-- CUSTOMER ACTIVE ORDERS CAROUSEL VIEW -->
+        <div id="customer-portal-view" class="hidden">
+          <div class="carousel-container">
+            <div id="carousel-slides-container">
+              <!-- Dynamically populated carousel slides -->
+            </div>
+            
+            <div class="carousel-nav" id="carousel-nav-controls">
+              <button class="carousel-nav-btn" id="carouselPrevBtn" type="button">Prev</button>
+              <span class="carousel-indicators" id="carouselIndicator">Order 0 of 0</span>
+              <button class="carousel-nav-btn" id="carouselNextBtn" type="button">Next</button>
+            </div>
+          </div>
+
+          <button class="btn btn-secondary btn-full" id="portalSignOutBtn" type="button" style="margin-top: 18px; background: rgba(255, 255, 255, 0.05); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.1);">
+            Sign Out
+          </button>
+        </div>
+
+        <div id="totp-status" class="status"></div>
+      </div>
+    </div>
+  </section>
+
   <footer class="premium-footer">
     <div class="container premium-footer-inner">
       <div class="footer-brand">
@@ -132,6 +202,11 @@
   </footer>
 
   <script src="js/navigation.js"></script>
+  <script>
+    if (window.location.protocol === 'file:') {
+      alert('WARNING: You have opened the index.html file directly from the file system. Please run the server and access the application via http://localhost:5000 so that authentication, modules, and API calls work properly.');
+    }
+  </script>
   <script type="module" src="js/app.js"></script>
 </body>
 

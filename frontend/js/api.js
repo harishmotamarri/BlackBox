@@ -41,5 +41,9 @@ export const api = {
   verifyCode: (packetId, verificationCode) => post('/verify-code', { packetId, verificationCode }),
   unlock: (packetId) => post('/unlock', { packetId }),
   checkPacket: (packetId) => get(`/status/${encodeURIComponent(packetId)}`),
-  status: (packetId) => get(`/status/${encodeURIComponent(packetId)}`)
+  status: (packetId) => get(`/status/${encodeURIComponent(packetId)}`),
+  registerTotp: (packetId, mobileNumber, userId) => post('/register-totp', { packetId, mobileNumber, userId }),
+  unlockTotp: (packetId, userId, totp) => post('/unlock-totp', { packetId, userId, totp }),
+  customerSignup: (mobileNumber, password) => post('/customer-signup', { mobileNumber, password }),
+  customerLogin: (mobileNumber, password) => post('/customer-login', { mobileNumber, password })
 };

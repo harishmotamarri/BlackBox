@@ -1565,3 +1565,285 @@ textarea,
     gap: 20px;
   }
 }
+
+/* TOTP Authenticator Section Styles */
+.totp-authenticator-section {
+  padding: clamp(60px, 6vw, 100px) 10px;
+  background: radial-gradient(circle at 50% 100%, #17153f 0%, var(--bg) 70%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.totp-authenticator-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.totp-authenticator-card {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  background:
+    linear-gradient(158deg, rgba(15, 23, 42, 0.88) 0%, rgba(2, 6, 23, 0.86) 60%, rgba(8, 47, 73, 0.75) 100%);
+  box-shadow: 0 28px 46px rgba(2, 6, 23, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.totp-authenticator-card .small {
+  color: #b9c4d7;
+}
+
+.totp-authenticator-card .input-field {
+  margin-bottom: 14px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border-color: rgba(148, 163, 184, 0.36);
+  background: rgba(2, 6, 23, 0.76);
+  width: 100%;
+  color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.totp-authenticator-card .input-field:focus {
+  outline: none;
+  border-color: rgba(125, 211, 252, 0.85);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.23);
+  background: rgba(2, 6, 23, 0.9);
+}
+
+.totp-authenticator-card .btn-full {
+  width: 100%;
+}
+
+.totp-authenticator-card .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 999px;
+  font-size: 0.93rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.totp-authenticator-card .btn-primary {
+  border: 1px solid rgba(125, 211, 252, 0.52);
+  background: linear-gradient(125deg, #0284c7 0%, #0369a1 55%, #2563eb 100%);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(2, 132, 199, 0.35);
+}
+
+.totp-authenticator-card .btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 16px 30px rgba(2, 132, 199, 0.42);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.totp-display-container {
+  background: rgba(2, 6, 23, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 18px 0;
+  text-align: center;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.totp-code {
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7dd3fc;
+  margin-bottom: 14px;
+  text-shadow: 0 0 15px rgba(125, 211, 252, 0.4);
+}
+
+.totp-progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.totp-progress-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
+  border-radius: 999px;
+  transition: width 1s linear, background-color 0.3s ease;
+}
+
+.totp-progress-fill.warning {
+  background: linear-gradient(90deg, #fb7185 0%, #f43f5e 100%);
+}
+
+.totp-timer {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.totp-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding: 0 4px;
+}
+
+.totp-details strong {
+  color: #fff;
+}
+
+#totp-status {
+  min-height: 22px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+#totp-status[data-type='error'] {
+  color: #fca5a5;
+}
+
+#totp-status[data-type='success'] {
+  color: #86efac;
+}
+
+#totp-status[data-type='info'] {
+  color: #93c5fd;
+}
+
+#totp-status[data-type='warning'] {
+  color: #fbbf24;
+}
+
+/* --- Customer Auth & Active Orders Carousel --- */
+.auth-tabs {
+  display: flex;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  letter-spacing: 0.03em;
+}
+
+.auth-tab-btn.active {
+  color: #fff;
+  border-bottom-color: #38bdf8;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.auth-tab-btn:hover:not(.active) {
+  color: #fff;
+  opacity: 0.8;
+}
+
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.carousel-slide {
+  display: none;
+}
+
+.carousel-slide.active {
+  display: block;
+  animation: fadeIn 0.35s ease;
+}
+
+.carousel-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.carousel-nav-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.carousel-nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(125, 211, 252, 0.4);
+}
+
+.carousel-nav-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.carousel-indicators {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.order-metadata-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.order-metadata-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.order-metadata-row:last-child {
+  margin-bottom: 0;
+}
+
+.order-metadata-row span {
+  color: var(--muted);
+}
+
+.order-metadata-row strong {
+  color: #fff;
+}

@@ -59,6 +59,7 @@ let portalTimerInterval = null;
 let currentOtp = '000000';
 let remainingSeconds = 30;
 let isFetchingTotp = false;
+let currentPairingPacketId = null;
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -88,8 +89,17 @@ async function syncTotpFromServer() {
   if (isFetchingTotp) return;
   isFetchingTotp = true;
   try {
-    const data = await api.getTotpCurrent();
-    currentOtp = data.otp;
+    const order = customerOrders[activeOrderIndex];
+    if (!order) return;
+
+    const data = await api.getTotpCurrent(order.packetId);
+    if (data.paired) {
+      currentOtp = data.otp;
+      order.paired = true;
+    } else {
+      currentOtp = 'Not Paired';
+      order.paired = false;
+    }
     remainingSeconds = data.remainingSeconds;
     updateCarouselDisplay();
   } catch (err) {
@@ -102,20 +112,39 @@ async function syncTotpFromServer() {
 function updateCarouselDisplay() {
   if (customerOrders.length === 0) return;
   
-  const formattedCode = `${currentOtp.slice(0, 3)} ${currentOtp.slice(3)}`;
+  const order = customerOrders[activeOrderIndex];
+  const isCodePaired = order && order.paired;
+
+  let formattedCode = '--- ---';
+  if (isCodePaired && currentOtp && currentOtp !== 'Not Paired') {
+    formattedCode = `${currentOtp.slice(0, 3)} ${currentOtp.slice(3)}`;
+  } else if (currentOtp === 'Not Paired') {
+    formattedCode = 'Not Paired';
+  }
 
   const codeEl = $(`carouselTotpCode-${activeOrderIndex}`);
-  if (codeEl) codeEl.innerText = formattedCode;
+  if (codeEl) {
+    codeEl.innerText = formattedCode;
+    if (!isCodePaired) {
+      codeEl.style.color = '#64748b';
+      codeEl.style.fontSize = '2.2rem';
+    } else {
+      codeEl.style.color = '#38bdf8';
+      codeEl.style.fontSize = '3.5rem';
+    }
+  }
 
   const timerEl = $(`carouselTimer-${activeOrderIndex}`);
-  if (timerEl) timerEl.innerText = `Refresh in ${remainingSeconds}s`;
+  if (timerEl) {
+    timerEl.innerText = isCodePaired ? `Refresh in ${remainingSeconds}s` : 'Pair to view OTP';
+  }
 
   const progressFill = $(`carouselProgressFill-${activeOrderIndex}`);
   if (progressFill) {
-    const pct = (remainingSeconds / 30) * 100;
+    const pct = isCodePaired ? (remainingSeconds / 30) * 100 : 0;
     progressFill.style.width = `${pct}%`;
 
-    if (remainingSeconds <= 5) {
+    if (remainingSeconds <= 5 && isCodePaired) {
       progressFill.classList.add('warning');
     } else {
       progressFill.classList.remove('warning');
@@ -178,6 +207,7 @@ function renderCarousel() {
   // Render slides
   container.innerHTML = customerOrders.map((order, idx) => {
     const isActiveClass = idx === activeOrderIndex ? 'active' : '';
+    const buttonText = order.paired ? 'Re-pair Authenticator' : 'Pair Authenticator';
     return `
       <div class="carousel-slide ${isActiveClass}" data-index="${idx}">
         <div class="totp-display-container">
@@ -191,7 +221,10 @@ function renderCarousel() {
           <div class="totp-progress-bar">
             <div class="totp-progress-fill" id="carouselProgressFill-${idx}"></div>
           </div>
-          <div class="totp-timer" id="carouselTimer-${idx}">Refresh in 30s</div>
+          <div class="totp-timer" id="carouselTimer-${idx}" style="margin-bottom: 15px;">Refresh in 30s</div>
+          <button class="btn btn-secondary btn-full" onclick="window.showTotpSetup('${escapeHtml(order.packetId)}')" type="button" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2); font-size: 0.85em; padding: 8px 16px; border-radius: 8px; width: 100%;">
+            ${buttonText}
+          </button>
         </div>
       </div>
     `;
@@ -619,4 +652,100 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  // Close Setup Modal
+  const closeSetupBtn = $('closeTotpSetup');
+  if (closeSetupBtn) {
+    closeSetupBtn.onclick = () => {
+      const modal = $('totpSetupModal');
+      if (modal) modal.style.display = 'none';
+      currentPairingPacketId = null;
+    };
+  }
+
+  // Verify and Pair button event inside modal
+  const verifyPairBtn = $('totpVerifyPairBtn');
+  if (verifyPairBtn) {
+    verifyPairBtn.onclick = async () => {
+      const codeInput = $('totpVerifyCodeInput');
+      const statusEl = $('totpSetupModalStatus');
+      if (!codeInput || !statusEl || !currentPairingPacketId) return;
+
+      const code = codeInput.value.trim();
+      if (!code || code.length !== 6) {
+        statusEl.innerText = 'Please enter a 6-digit code';
+        statusEl.style.color = '#ef4444'; // Red
+        return;
+      }
+
+      try {
+        statusEl.innerText = 'Verifying...';
+        statusEl.style.color = '#38bdf8'; // Sky blue
+        
+        await api.pairTotp(currentPairingPacketId, code);
+
+        statusEl.innerText = 'Pairing successful!';
+        statusEl.style.color = '#10b981'; // Green
+
+        // Update active order paired status
+        const order = customerOrders.find(o => o.packetId === currentPairingPacketId);
+        if (order) {
+          order.paired = true;
+          // Save updated orders to local storage
+          localStorage.setItem('customer_orders', JSON.stringify(customerOrders));
+        }
+
+        setTimeout(async () => {
+          const modal = $('totpSetupModal');
+          if (modal) modal.style.display = 'none';
+          
+          // Re-render and sync immediately
+          renderCarousel();
+          await syncTotpFromServer();
+        }, 1500);
+      } catch (err) {
+        statusEl.innerText = err.message || 'Verification failed';
+        statusEl.style.color = '#ef4444'; // Red
+      }
+    };
+  }
 });
+
+window.showTotpSetup = async (packetId) => {
+  clearTotpStatus();
+  currentPairingPacketId = packetId;
+  const statusEl = $('totpSetupModalStatus');
+  if (statusEl) {
+    statusEl.innerText = '';
+    delete statusEl.style.color;
+  }
+  const codeInput = $('totpVerifyCodeInput');
+  if (codeInput) {
+    codeInput.value = '';
+  }
+  try {
+    setTotpStatus(`Requesting setup for ${packetId}...`, 'info');
+    const data = await api.getTotpSetup(packetId);
+
+    // Set QR Code source using the free qrserver API
+    const qrImg = $('totpQrCodeImg');
+    if (qrImg) {
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.otpauthUrl)}`;
+    }
+
+    // Set secret key
+    const secretCode = $('totpSecretKey');
+    if (secretCode) {
+      secretCode.innerText = data.secret;
+    }
+
+    // Show modal
+    const modal = $('totpSetupModal');
+    if (modal) {
+      modal.style.display = 'flex';
+    }
+    clearTotpStatus();
+  } catch (err) {
+    setTotpStatus(`Setup failed: ${err.message}`, 'error');
+  }
+};

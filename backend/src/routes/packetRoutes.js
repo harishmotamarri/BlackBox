@@ -75,6 +75,83 @@ function blockIfUnlocked(packet) {
   if (packet.status === 'UNLOCKED') httpError(409, 'Packet is already unlocked');
 }
 
+// GET /api/packet/:packetId/totp/setup
+router.get(
+  '/:packetId/totp/setup',
+  asyncHandler(async (req, res) => {
+    const { packetId } = req.params;
+    requireField(packetId, 'Packet ID');
+
+    const packet = await fetchPacketOr404(packetId);
+
+    let secretKey;
+    if (!packet.otphash) {
+      secretKey = generateSecret();
+      const encryptedSecret = encryptSecret(secretKey);
+      await supabase
+        .from('packets')
+        .update({ otphash: encryptedSecret })
+        .eq('packetid', packetId);
+    } else {
+      secretKey = decryptSecret(packet.otphash);
+    }
+
+    const otpauthUrl = `otpauth://totp/BlackBox:${packetId}?secret=${secretKey}&issuer=BlackBox`;
+
+    res.json({
+      secret: secretKey,
+      otpauthUrl: otpauthUrl
+    });
+  })
+);
+
+// POST /api/packet/:packetId/totp/pair
+router.post(
+  '/:packetId/totp/pair',
+  asyncHandler(async (req, res) => {
+    const { packetId } = req.params;
+    const { code } = req.body;
+    requireField(packetId, 'Packet ID');
+    requireField(code, 'Code');
+
+    const packet = await fetchPacketOr404(packetId);
+
+    if (!packet.otphash) {
+      httpError(400, 'TOTP is not configured for this packet');
+    }
+
+    let secretKey;
+    try {
+      secretKey = decryptSecret(packet.otphash);
+    } catch (e) {
+      httpError(500, 'Security decryption error');
+    }
+
+    const valid = speakeasy.totp.verify({
+      secret: secretKey,
+      encoding: 'base32',
+      token: code,
+      window: 1
+    });
+    if (!valid) {
+      httpError(400, 'Invalid verification code. Pairing failed.');
+    }
+
+    // Update pairing status to 'true' in database
+    const { error } = await supabase
+      .from('packets')
+      .update({ totpSecret: 'true' })
+      .eq('packetid', packetId);
+
+    if (error) {
+      console.error('Supabase error during pairing update:', error);
+      httpError(500, 'Failed to save pairing confirmation');
+    }
+
+    res.json({ success: true, message: 'Pairing successful' });
+  })
+);
+
 // POST /api/packet/verify-code
 router.post(
   '/verify-code',
@@ -170,8 +247,24 @@ router.post(
     }
 
     if (otp !== undefined) {
-      // Validate OTP using speakeasy
-      const secretKey = process.env.TOTP_SECRET || 'QFBZC3OHPK4L7MUGZO5NO6XOREWN2IBQ';
+      if (!packet.totpSecret || packet.totpSecret !== 'true') {
+        return res.status(400).json({
+          success: false,
+          message: 'Authenticator not paired yet'
+        });
+      }
+      // Validate OTP using speakeasy and packet-specific secret
+      let secretKey;
+      if (!packet.otphash) {
+        secretKey = generateSecret();
+        const encryptedSecret = encryptSecret(secretKey);
+        await supabase
+          .from('packets')
+          .update({ otphash: encryptedSecret })
+          .eq('packetid', packetId);
+      } else {
+        secretKey = decryptSecret(packet.otphash);
+      }
 
       const verified = speakeasy.totp.verify({
         secret: secretKey,
@@ -325,6 +418,11 @@ router.post(
     if (!packet.otphash) {
       logEvent(ip, packetId, userId, 'UNLOCK_FAILED', 'Attempted unlock on non-TOTP registered packet');
       httpError(400, 'Packet has not been registered for TOTP authentication');
+    }
+
+    if (!packet.totpSecret || packet.totpSecret !== 'true') {
+      logEvent(ip, packetId, userId, 'UNLOCK_FAILED', 'Attempted unlock on non-paired packet');
+      httpError(400, 'Packet has not been paired with Authenticator');
     }
 
     let secret;
@@ -536,6 +634,7 @@ router.post(
       activeOrders.push({
         packetId: packet.packetid,
         secret: secret,
+        paired: packet.totpSecret === 'true',
         status: packet.status,
         fromLocation: packet.from_location || '-',
         toLocation: packet.to_location || '-',

@@ -46,8 +46,23 @@ export const api = {
   unlockTotp: (packetId, userId, totp) => post('/unlock-totp', { packetId, userId, totp }),
   customerSignup: (mobileNumber, password) => post('/customer-signup', { mobileNumber, password }),
   customerLogin: (mobileNumber, password) => post('/customer-login', { mobileNumber, password }),
-  getTotpCurrent: async () => {
-    const res = await fetch('/api/totp/current');
+  pairTotp: (packetId, code) => post('/' + encodeURIComponent(packetId) + '/totp/pair', { code }),
+  getTotpCurrent: async (packetId) => {
+    const res = await fetch(`/api/totp/current?packetId=${encodeURIComponent(packetId)}`);
+    const text = await res.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error('Invalid server response');
+    }
+    if (!res.ok) {
+      throw new Error(data.error || 'Server error');
+    }
+    return data;
+  },
+  getTotpSetup: async (packetId) => {
+    const res = await fetch(`/api/packet/${encodeURIComponent(packetId)}/totp/setup`);
     const text = await res.text();
     let data;
     try {

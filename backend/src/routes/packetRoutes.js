@@ -1,5 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
+const speakeasy = require('speakeasy');
 const { supabase } = require('../db/database');
 const { ensureLockTimeout, ADDED_AUTO_LOCK_DELAY_MS } = require('../utils/packetUtils');
 const { generateSecret, verifyTOTP, encryptSecret, decryptSecret, getEncryptionKey } = require('../utils/totp');
@@ -155,7 +156,7 @@ router.post(
 router.post(
   '/unlock',
   asyncHandler(async (req, res) => {
-    const { packetId } = req.body;
+    const { packetId, otp } = req.body;
     requireField(packetId, 'Packet ID');
 
     const packet = await fetchPacketOr404(packetId);
@@ -168,14 +169,56 @@ router.post(
       });
     }
 
-    if (packet.status !== 'VERIFIED') {
-      httpError(403, 'Unauthorized');
+    if (otp !== undefined) {
+      // Validate OTP using speakeasy
+      const secretKey = process.env.TOTP_SECRET || 'QFBZC3OHPK4L7MUGZO5NO6XOREWN2IBQ';
+
+      const verified = speakeasy.totp.verify({
+        secret: secretKey,
+        encoding: 'base32',
+        token: otp,
+        window: 1
+      });
+
+      if (!verified) {
+        // Increment attempts, check if tampered
+        const attempts = (packet.attempts || 0) + 1;
+        const tamperedNow = attempts >= MAX_ATTEMPTS;
+
+        await supabase
+          .from('packets')
+          .update({
+            attempts: attempts,
+            status: tamperedNow ? 'TAMPERED' : packet.status
+          })
+          .eq('packetid', packetId);
+
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+        logEvent(ip, packetId, 'CUSTOMER', tamperedNow ? 'TAMPER_ALERT' : 'UNLOCK_FAILED', `Invalid TOTP code. New attempts: ${attempts}`);
+
+        if (tamperedNow) {
+          httpError(403, 'Tamper alert: too many invalid attempts');
+        }
+        return res.json({
+          success: false,
+          message: 'Invalid or expired OTP'
+        });
+      }
+    } else {
+      // Legacy behavior fallback
+      if (packet.status !== 'VERIFIED') {
+        httpError(403, 'Unauthorized');
+      }
     }
 
+    // Success unlock logic
     await supabase
       .from('packets')
-      .update({ status: 'UNLOCKED' })
+      .update({ status: 'UNLOCKED', attempts: 0 })
       .eq('packetid', packetId);
+
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    logEvent(ip, packetId, 'CUSTOMER', 'UNLOCK_SUCCESS', `Packet unlocked successfully.`);
 
     // Auto-lock after 5 minutes
     setTimeout(async () => {
@@ -189,11 +232,11 @@ router.post(
       if (error) {
         console.error(`Failed to auto-lock packet ${packetId}:`, error);
       } else {
-        console.log(`Packet ${packetId} locked successfully.`);
+        logEvent('SYSTEM', packetId, 'SYSTEM', 'AUTO_LOCK', 'Packet automatically locked after 5 minutes');
       }
     }, ADDED_AUTO_LOCK_DELAY_MS);
 
-    res.json({ success: true, message: 'Package unlocked' });
+    res.json({ success: true, message: 'Packet unlocked' });
   })
 );
 

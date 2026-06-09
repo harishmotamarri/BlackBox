@@ -39,11 +39,25 @@ async function get(endpoint) {
 
 export const api = {
   verifyCode: (packetId, verificationCode) => post('/verify-code', { packetId, verificationCode }),
-  unlock: (packetId) => post('/unlock', { packetId }),
+  unlock: (packetId, otp) => post('/unlock', { packetId, otp }),
   checkPacket: (packetId) => get(`/status/${encodeURIComponent(packetId)}`),
   status: (packetId) => get(`/status/${encodeURIComponent(packetId)}`),
   registerTotp: (packetId, mobileNumber, userId) => post('/register-totp', { packetId, mobileNumber, userId }),
   unlockTotp: (packetId, userId, totp) => post('/unlock-totp', { packetId, userId, totp }),
   customerSignup: (mobileNumber, password) => post('/customer-signup', { mobileNumber, password }),
-  customerLogin: (mobileNumber, password) => post('/customer-login', { mobileNumber, password })
+  customerLogin: (mobileNumber, password) => post('/customer-login', { mobileNumber, password }),
+  getTotpCurrent: async () => {
+    const res = await fetch('/api/totp/current');
+    const text = await res.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error('Invalid server response');
+    }
+    if (!res.ok) {
+      throw new Error(data.error || 'Server error');
+    }
+    return data;
+  }
 };

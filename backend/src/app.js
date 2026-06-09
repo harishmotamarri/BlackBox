@@ -24,6 +24,7 @@ function createApp() {
   app.use('/api/admin', adminRoutes);
   app.use('/api/partner', require('./routes/partnerRoutes'));
   app.use('/api/hardware', hardwareRoutes);
+  app.use('/api/totp', require('./routes/totpRoutes'));
 
   // Frontend (same origin avoids CORS pain)
   const frontendDir = path.join(__dirname, '..', '..', 'frontend');

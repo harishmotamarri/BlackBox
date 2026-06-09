@@ -56,6 +56,9 @@ let customerMobile = null;
 let customerOrders = [];
 let activeOrderIndex = 0;
 let portalTimerInterval = null;
+let currentOtp = '000000';
+let remainingSeconds = 30;
+let isFetchingTotp = false;
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -81,46 +84,69 @@ function clearTotpStatus() {
   delete el.dataset.type;
 }
 
+async function syncTotpFromServer() {
+  if (isFetchingTotp) return;
+  isFetchingTotp = true;
+  try {
+    const data = await api.getTotpCurrent();
+    currentOtp = data.otp;
+    remainingSeconds = data.remainingSeconds;
+    updateCarouselDisplay();
+  } catch (err) {
+    console.error('Failed to sync TOTP from server:', err);
+  } finally {
+    isFetchingTotp = false;
+  }
+}
+
+function updateCarouselDisplay() {
+  if (customerOrders.length === 0) return;
+  
+  const formattedCode = `${currentOtp.slice(0, 3)} ${currentOtp.slice(3)}`;
+
+  const codeEl = $(`carouselTotpCode-${activeOrderIndex}`);
+  if (codeEl) codeEl.innerText = formattedCode;
+
+  const timerEl = $(`carouselTimer-${activeOrderIndex}`);
+  if (timerEl) timerEl.innerText = `Refresh in ${remainingSeconds}s`;
+
+  const progressFill = $(`carouselProgressFill-${activeOrderIndex}`);
+  if (progressFill) {
+    const pct = (remainingSeconds / 30) * 100;
+    progressFill.style.width = `${pct}%`;
+
+    if (remainingSeconds <= 5) {
+      progressFill.classList.add('warning');
+    } else {
+      progressFill.classList.remove('warning');
+    }
+  }
+}
+
 // --- Carousel Countdown Loop ---
 function startPortalTimer() {
-  if (portalTimerInterval) clearInterval(portalTimerInterval);
+  if (portalTimerInterval) {
+    updateCarouselDisplay();
+    return;
+  }
 
   async function update() {
     if (customerOrders.length === 0) return;
-    const order = customerOrders[activeOrderIndex];
-    if (!order || !order.secret) return;
+    
+    remainingSeconds--;
 
-    try {
-      const code = await generateBrowserTOTP(order.secret);
-      const formattedCode = `${code.slice(0, 3)} ${code.slice(3)}`;
-      
-      const codeEl = $(`carouselTotpCode-${activeOrderIndex}`);
-      if (codeEl) codeEl.innerText = formattedCode;
-
-      const now = Date.now();
-      const secondsRemaining = 60 - Math.floor((now / 1000) % 60);
-
-      const timerEl = $(`carouselTimer-${activeOrderIndex}`);
-      if (timerEl) timerEl.innerText = `Refresh in ${secondsRemaining}s`;
-
-      const progressFill = $(`carouselProgressFill-${activeOrderIndex}`);
-      if (progressFill) {
-        const pct = (secondsRemaining / 60) * 100;
-        progressFill.style.width = `${pct}%`;
-
-        if (secondsRemaining <= 10) {
-          progressFill.classList.add('warning');
-        } else {
-          progressFill.classList.remove('warning');
-        }
-      }
-    } catch (err) {
-      console.error('Failed to generate carousel TOTP code:', err);
+    if (remainingSeconds <= 0) {
+      await syncTotpFromServer();
+    } else {
+      updateCarouselDisplay();
     }
   }
 
-  update();
-  portalTimerInterval = setInterval(update, 1000);
+  syncTotpFromServer().then(() => {
+    if (!portalTimerInterval) {
+      portalTimerInterval = setInterval(update, 1000);
+    }
+  });
 }
 
 // --- Render Carousel Slides ---
@@ -165,7 +191,7 @@ function renderCarousel() {
           <div class="totp-progress-bar">
             <div class="totp-progress-fill" id="carouselProgressFill-${idx}"></div>
           </div>
-          <div class="totp-timer" id="carouselTimer-${idx}">Refresh in 60s</div>
+          <div class="totp-timer" id="carouselTimer-${idx}">Refresh in 30s</div>
         </div>
       </div>
     `;
@@ -291,23 +317,22 @@ async function onCustomerSignIn(e) {
 async function onCarouselUnlock(packetId) {
   clearTotpStatus();
   const order = customerOrders.find(o => o.packetId === packetId);
-  if (!order || !order.secret) return;
+  if (!order) return;
 
   try {
     setTotpStatus(`Verifying TOTP token for ${packetId}...`, 'info');
-    const currentTotp = await generateBrowserTOTP(order.secret);
-    const res = await api.unlockTotp(packetId, customerMobile, currentTotp);
+    const res = await api.unlock(packetId, currentOtp);
 
-    if (res.token) {
-      sessionStorage.setItem('lockit_auth_token', res.token);
+    if (res.success) {
+      setTotpStatus(`Lockit ${packetId} successfully unlocked!`, 'success');
+      
+      // Update status locally
+      order.status = 'UNLOCKED';
+      localStorage.setItem('customer_orders', JSON.stringify(customerOrders));
+      renderCarousel();
+    } else {
+      setTotpStatus(res.message || 'Invalid or expired OTP', 'error');
     }
-
-    setTotpStatus(`Lockit ${packetId} successfully unlocked!`, 'success');
-    
-    // Update status locally
-    order.status = 'UNLOCKED';
-    localStorage.setItem('customer_orders', JSON.stringify(customerOrders));
-    renderCarousel();
   } catch (err) {
     if (/tamper/i.test(err.message || '')) {
       enterTamperedState(err.message);
@@ -474,18 +499,21 @@ async function onVerifyAndUnlock() {
   }
 
   try {
-    setStatus('Verifying ID…', 'info');
-    await api.verifyCode(packetId, code);
-    setStatus('Verification ID verified. Unlocking…', 'success');
-    await api.unlock(packetId);
-    setStatus('Package is now Unlocked ', 'success');
+    setStatus('Verifying OTP and Unlocking…', 'info');
+    const res = await api.unlock(packetId, code);
 
-    setPacketIdDisabled(true);
-    const inputCode = $('verificationCode');
-    if (inputCode) inputCode.disabled = true;
+    if (res && res.success) {
+      setStatus('Package is now Unlocked ', 'success');
 
-    renderUnlockedView(packetId);
-    wireDynamicButtons();
+      setPacketIdDisabled(true);
+      const inputCode = $('verificationCode');
+      if (inputCode) inputCode.disabled = true;
+
+      renderUnlockedView(packetId);
+      wireDynamicButtons();
+    } else {
+      setStatus(res.message || 'Invalid or expired OTP', 'error');
+    }
   } catch (e) {
     if (/tamper/i.test(e.message || '')) {
       enterTamperedState(e.message);

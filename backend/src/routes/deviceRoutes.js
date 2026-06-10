@@ -11,17 +11,16 @@ const asyncHandler = (fn) => (req, res, next) =>
 router.post(
     '/register',
     asyncHandler(async (req, res) => {
-        const packetId = req.body.packetId || req.body.packetid || req.body.deviceId || req.body.device_id;
+        const deviceId = req.body.deviceId;
         
-        if (!packetId) {
-            return res.status(400).json({ success: false, error: 'Packet ID or Device ID is required' });
+        if (!deviceId) {
+            return res.status(400).json({ success: false, error: 'Device ID is required' });
         }
 
-        // Verify packet exists in the database
         const { data: packet, error } = await supabase
             .from('packets')
             .select('*')
-            .eq('packetid', String(packetId).trim())
+            .eq('deviceid', deviceId)
             .single();
 
         if (error || !packet) {

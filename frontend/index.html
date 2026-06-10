@@ -18,13 +18,20 @@
   <header class="nav">
     <div class="container nav-inner">
       <a href="index.html" class="logo">Lockit</a>
-      <div class="dropdown">
-        <button class="dropdown-btn" type="button">Log in</button>
-        <div class="dropdown-content">
-          <a href="admin.html">Admin Login</a>
-          <a href="ecommerce_login.html">Partner Login</a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav-menu">
+        <div class="dropdown">
+          <button class="dropdown-btn" type="button">Log in</button>
+          <div class="dropdown-content">
+            <a href="admin.html">Admin Login</a>
+            <a href="ecommerce_login.html">Partner Login</a>
+          </div>
         </div>
-      </div>
+      </nav>
     </div>
   </header>
 
@@ -208,7 +215,7 @@
     }
   </script>
   <div id="totpSetupModal" class="modal-overlay" style="display: none; z-index: 1000;">
-    <div class="modal-content" style="max-width: 400px; text-align: center; background: linear-gradient(155deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 14, 33, 0.98) 100%); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 20px; padding: 25px; color: #e2e8f0; position: relative;">
+    <div class="modal-content" style="width: min(400px, 92vw); max-width: 100%; text-align: center; background: linear-gradient(155deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 14, 33, 0.98) 100%); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 20px; padding: 25px; color: #e2e8f0; position: relative;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 15px;">
         <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">Pair Authenticator</h3>
         <button id="closeTotpSetup" class="modal-close" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; transition: color 0.2s;">&times;</button>

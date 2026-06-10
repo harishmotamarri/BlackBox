@@ -349,10 +349,14 @@
     <header class="nav">
         <div class="container nav-inner">
             <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">Lockit-Admin</a>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-
-                <button id="logoutBtn" class="admin">Logout</button>
-            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav-menu">
+                <button id="logoutBtn" class="admin" style="width: 100%;">Logout</button>
+            </nav>
         </div>
     </header>
 
@@ -550,7 +554,7 @@
     </div>
 
     <div id="adminTotpModal" class="modal-overlay" style="display: none; z-index: 1000;">
-        <div class="modal-content" style="max-width: 400px; text-align: center; background: linear-gradient(155deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 14, 33, 0.98) 100%); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 20px; padding: 25px; color: #e2e8f0; position: relative;">
+        <div class="modal-content" style="width: min(400px, 92vw); max-width: 100%; text-align: center; background: linear-gradient(155deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 14, 33, 0.98) 100%); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 20px; padding: 25px; color: #e2e8f0; position: relative;">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 15px;">
                 <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">Authenticator Paired</h3>
                 <button id="closeAdminTotpModal" class="modal-close" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; transition: color 0.2s;">&times;</button>
@@ -777,12 +781,12 @@
                                     pkt.status === 'VERIFIED' ? 'status-badge-verified' : 'status-badge-locked';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td style="font-weight: 600;">${pkt.packetid}</td>
-                    <td>
+                    <td data-label="Index">${index + 1}</td>
+                    <td data-label="Packet ID" style="font-weight: 600;">${pkt.packetid}</td>
+                    <td data-label="Status">
                         <span class="status-badge ${statusClass}">${pkt.status}</span>
                     </td>
-                    <td>
+                    <td data-label="Action">
                         <button onclick="viewDetailedReport('${pkt.packetid}')" class="master-btn" style="background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; padding: 6px 14px; font-size: 0.78em; box-shadow: 0 4px 12px rgba(67,56,202,0.25);">View Report</button>
                     </td>
                 `;
@@ -930,8 +934,8 @@
 
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                            <td style="font-weight: 600; color: #94a3b8;">${label}</td>
-                            <td>${displayValue}</td>
+                            <td data-label="Field" style="font-weight: 600; color: #94a3b8;">${label}</td>
+                            <td data-label="Value">${displayValue}</td>
                         `;
                         tbody.appendChild(tr);
                     });
@@ -960,14 +964,14 @@
                     const v = parts.join(':').trim();
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 600; color: #94a3b8;">${k}</td>
-                        <td>${v}</td>
+                        <td data-label="Detail" style="font-weight: 600; color: #94a3b8;">${k}</td>
+                        <td data-label="Information">${v}</td>
                     `;
                     tbody.appendChild(tr);
                 } else {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td colspan="2" style="color: #94a3b8;">${line.trim()}</td>
+                        <td colspan="2" data-label="Info" style="color: #94a3b8; text-align: center;">${line.trim()}</td>
                     `;
                     tbody.appendChild(tr);
                 }

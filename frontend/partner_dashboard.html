@@ -14,11 +14,15 @@
     <header class="nav">
         <div class="container nav-inner">
             <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">BlackBox-Partner</a>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <span id="welcomeMsg" style="color: #9ca3af; font-size: 0.9em;"></span>
-
-                <button class="admin" id="logoutBtn" style="border-color: #ef4444; color: #ef4444;">Logout</button>
-            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav-menu">
+                <span id="welcomeMsg" style="color: #9ca3af; font-size: 0.9em; margin-bottom: 15px; text-align: center; display: block;"></span>
+                <button class="admin" id="logoutBtn" style="border-color: #ef4444; color: #ef4444; width: 100%;">Logout</button>
+            </nav>
         </div>
     </header>
 
@@ -44,147 +48,159 @@
                 </div>
             </div>
 
-            <div class="dashboard-cards">
+            <!-- 1. Assign Delivery To Packet -->
+            <div class="hero-card" style="max-width: 1200px; width: 100%; margin-bottom: 2rem;">
+                <h4>Assign Delivery To Packet</h4>
+                <p class="small">Configure delivery, customer, and order details.</p>
 
-                <!-- Redesigned 3-Block Assignment Section -->
-                <div class="hero-card" style="max-width: 1200px; width: 100%;">
-                    <h4>Assign Delivery To Packet</h4>
-                    <p class="small">Configure delivery, customer, and order details.</p>
-
-                    <div class="assignment-grid">
-                        <!-- 1. Packet Details -->
-                        <div class="assignment-block">
-                            <h5>1. Packet Details</h5>
-                            <div class="input-group">
-                                <label>Packet ID</label>
-                                <input id="packetId" class="input-field" placeholder="P-XXXX" />
+                <div class="assignment-grid">
+                    <!-- 1. Packet Details -->
+                    <div class="assignment-block">
+                        <h5>1. Packet Details</h5>
+                        <div class="input-group">
+                            <label>Packet ID</label>
+                            <input id="packetId" class="input-field" placeholder="P-XXXX" />
+                        </div>
+                        <div class="input-group">
+                            <label>Weight (kg)</label>
+                            <input id="packetWeight" class="input-field" placeholder="2.5" />
+                        </div>
+                        <div class="input-group">
+                            <label>Packet Type</label>
+                            <select id="packetType" class="input-field" style="background: #1f2937; color: white;">
+                                <option value="Standard">Standard</option>
+                                <option value="Fragile">Fragile</option>
+                                <option value="High Value">High Value</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group" style="flex: 1;">
+                                <label>From</label>
+                                <input id="fromLocation" class="input-field" placeholder="Mumbai" />
                             </div>
-                            <div class="input-group">
-                                <label>Weight (kg)</label>
-                                <input id="packetWeight" class="input-field" placeholder="2.5" />
-                            </div>
-                            <div class="input-group">
-                                <label>Packet Type</label>
-                                <select id="packetType" class="input-field" style="background: #1f2937; color: white;">
-                                    <option value="Standard">Standard</option>
-                                    <option value="Fragile">Fragile</option>
-                                    <option value="High Value">High Value</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <div class="input-group" style="flex: 1;">
-                                    <label>From</label>
-                                    <input id="fromLocation" class="input-field" placeholder="Mumbai" />
-                                </div>
-                                <div class="input-group" style="flex: 1;">
-                                    <label>To</label>
-                                    <input id="toLocation" class="input-field" placeholder="Bangalore" />
-                                </div>
-                            </div>
-                            <div class="input-group">
-                                <label>Est. Battery (%)</label>
-                                <input id="estBattery" class="input-field" placeholder="85%" />
+                            <div class="input-group" style="flex: 1;">
+                                <label>To</label>
+                                <input id="toLocation" class="input-field" placeholder="Bangalore" />
                             </div>
                         </div>
-
-                        <!-- 2. Customer Details -->
-                        <div class="assignment-block">
-                            <h5>2. Customer Details</h5>
-                            <div class="input-group">
-                                <label>Username</label>
-                                <input id="userName" class="input-field" placeholder="Hemanth" />
-                            </div>
-                            <div class="input-group">
-                                <label>Phone Number</label>
-                                <input id="userPhone" class="input-field" placeholder="+91 XXXX XXXX" />
-                            </div>
-                            <div class="input-group">
-                                <label>Platform Ordered</label>
-                                <input id="platformOrdered" class="input-field" placeholder="Amazon/Flipkart" />
-                            </div>
-                            <div class="input-group">
-                                <label>Payment ID</label>
-                                <input id="paymentId" class="input-field" placeholder="PAY-12345" />
-                            </div>
-                            <div class="input-group">
-                                <label>Order Date</label>
-                                <input type="date" id="orderDate" class="input-field" />
-                            </div>
-                            <div class="input-group">
-                                <label>Shipping Address</label>
-                                <textarea id="shippingAddr" class="input-field" placeholder="Full street address..."
-                                    style="height: 120px; resize: none;"></textarea>
-                            </div>
-
-                            <!-- Button moved to separate block -->
+                        <div class="input-group">
+                            <label>Est. Battery (%)</label>
+                            <input id="estBattery" class="input-field" placeholder="85%" />
                         </div>
+                    </div>
 
-                        <!-- 3. Order Details -->
-                        <div class="assignment-block">
-                            <h5>3. Order Details</h5>
-                            <div class="input-group">
-                                <label>Product Name</label>
-                                <input id="productName" class="input-field" placeholder="iPhone 15 Pro" />
-                            </div>
-                            <div class="input-group">
-                                <label>Product Price ($)</label>
-                                <input id="productPrice" class="input-field" placeholder="999.00" />
-                            </div>
-                            <div class="input-group">
-                                <label>Product Price Type (Auto)</label>
-                                <input id="orderPriceType" class="input-field read-only-sync" readonly
-                                    value="Standard" />
-                            </div>
-                            <div class="input-group">
-                                <label>Weight Sync (Auto)</label>
-                                <input id="orderWeight" class="input-field read-only-sync" readonly value="-" />
-                            </div>
-                            <div class="input-group">
-                                <label>Seller Name</label>
-                                <input id="sellerName" class="input-field" placeholder="Global Retailers" />
-                            </div>
-                            <div class="input-group">
-                                <label>Seller Contact</label>
-                                <input id="sellerContact" class="input-field" placeholder="contact@seller.com" />
-                            </div>
+                    <!-- 2. Customer Details -->
+                    <div class="assignment-block">
+                        <h5>2. Customer Details</h5>
+                        <div class="input-group">
+                            <label>Username</label>
+                            <input id="userName" class="input-field" placeholder="Hemanth" />
                         </div>
+                        <div class="input-group">
+                            <label>Phone Number</label>
+                            <input id="userPhone" class="input-field" placeholder="+91 XXXX XXXX" />
+                        </div>
+                        <div class="input-group">
+                            <label>Platform Ordered</label>
+                            <input id="platformOrdered" class="input-field" placeholder="Amazon/Flipkart" />
+                        </div>
+                        <div class="input-group">
+                            <label>Payment ID</label>
+                            <input id="paymentId" class="input-field" placeholder="PAY-12345" />
+                        </div>
+                        <div class="input-group">
+                            <label>Order Date</label>
+                            <input type="date" id="orderDate" class="input-field" />
+                        </div>
+                        <div class="input-group">
+                            <label>Shipping Address</label>
+                            <textarea id="shippingAddr" class="input-field" placeholder="Full street address..."
+                                style="height: 120px; resize: none;"></textarea>
+                        </div>
+                    </div>
 
-                        <!-- 4. Action Area -->
-                        <div class="assignment-action-area">
-                            <div id="assignStatus" class="status"></div>
-                            <button id="assignBtn" class="btn btn-primary btn-full">Assign & Activate</button>
+                    <!-- 3. Order Details -->
+                    <div class="assignment-block">
+                        <h5>3. Order Details</h5>
+                        <div class="input-group">
+                            <label>Product Name</label>
+                            <input id="productName" class="input-field" placeholder="iPhone 15 Pro" />
+                        </div>
+                        <div class="input-group">
+                            <label>Product Price ($)</label>
+                            <input id="productPrice" class="input-field" placeholder="999.00" />
+                        </div>
+                        <div class="input-group">
+                            <label>Product Price Type (Auto)</label>
+                            <input id="orderPriceType" class="input-field read-only-sync" readonly
+                                value="Standard" />
+                        </div>
+                        <div class="input-group">
+                            <label>Weight Sync (Auto)</label>
+                            <input id="orderWeight" class="input-field read-only-sync" readonly value="-" />
+                        </div>
+                        <div class="input-group">
+                            <label>Seller Name</label>
+                            <input id="sellerName" class="input-field" placeholder="Global Retailers" />
+                        </div>
+                        <div class="input-group">
+                            <label>Seller Contact</label>
+                            <input id="sellerContact" class="input-field" placeholder="contact@seller.com" />
+                        </div>
+                    </div>
+
+                    <!-- 4. Action Area -->
+                    <div class="assignment-action-area">
+                        <div id="assignStatus" class="status"></div>
+                        <button id="assignBtn" class="btn btn-primary btn-full">Assign & Activate</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Track Delivery -->
+            <div class="hero-card" style="max-width: 1200px; width: 100%;">
+                <h4>Track Delivery</h4>
+                <p class="small">View current delivery status.</p>
+                <br>
+                <div style="display: flex; gap: 12px; align-items: center; max-width: 600px; margin-bottom: 10px;" class="form-row">
+                    <input id="trackPacketId" class="input-field" placeholder="Enter Packet ID" style="margin-bottom: 0;" />
+                    <button id="trackBtn" class="btn btn-primary"
+                        style="background-color: #3b82f6; border-color: #3b82f6; min-height: 44px; white-space: nowrap;">Check Status</button>
+                </div>
+                <div id="trackStatus" class="status"></div>
+
+                <!-- Limited Status View -->
+                <div id="trackResult" style="margin-top: 24px; text-align: left; display: none;">
+                    <div class="assignment-grid" style="margin-top: 10px;">
+                        <div class="assignment-block">
+                            <span class="small" style="color: #9ca3af; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Status</span>
+                            <span id="resStatus" style="color: white; font-weight: 700; font-size: 1.15rem;"></span>
+                        </div>
+                        <div class="assignment-block">
+                            <span class="small" style="color: #9ca3af; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Route</span>
+                            <span id="resRoute" style="color: white; font-weight: 700; font-size: 1.15rem;"></span>
+                        </div>
+                        <div class="assignment-block">
+                            <span class="small" style="color: #9ca3af; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Battery</span>
+                            <span id="resBattery" style="color: #10b981; font-weight: 700; font-size: 1.15rem;"></span>
+                        </div>
+                    </div>
+                    <div class="assignment-grid" style="margin-top: 15px;">
+                        <div class="assignment-block">
+                            <span class="small" style="color: #9ca3af; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Weight</span>
+                            <span id="resWeight" style="color: white; font-weight: 700; font-size: 1.15rem;"></span>
+                        </div>
+                        <div class="assignment-block">
+                            <span class="small" style="color: #9ca3af; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Transit</span>
+                            <span id="resTransit" style="color: #3b82f6; font-weight: 700; font-size: 1.15rem;"></span>
+                        </div>
+                        <div class="assignment-block">
+                            <span class="small" style="color: #9ca3af; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Customer Details</span>
+                            <span id="resUser" style="color: white; font-weight: 700; font-size: 1.15rem;"></span>
                         </div>
                     </div>
                 </div>
-
-                <!-- 2. Track Delivery -->
-                <div class="hero-card">
-                    <h4>Track Delivery</h4>
-                    <p class="small">View current delivery status.</p>
-                    <br>
-                    <input id="trackPacketId" class="input-field" placeholder="Packet ID" />
-                    <div id="trackStatus" class="status"></div>
-                    <button id="trackBtn" class="btn btn-primary btn-full"
-                        style="background-color: #3b82f6; border-color: #3b82f6;">Check Status</button>
-
-                    <!-- Limited Status View -->
-                    <div id="trackResult" style="margin-top: 20px; text-align: left; display: none;">
-                        <p class="small" style="color: #9ca3af;">Status: <span id="resStatus"
-                                style="color: white;"></span></p>
-                        <p class="small" style="color: #9ca3af;">Weight: <span id="resWeight"
-                                style="color: white; font-weight: 500;"></span></p>
-                        <p class="small" style="color: #9ca3af;">Battery: <span id="resBattery"
-                                style="color: #10b981; font-weight: 500;"></span></p>
-                        <p class="small" style="color: #9ca3af;">Customer: <span id="resUser"
-                                style="color: white;"></span></p>
-                        <p class="small" style="color: #9ca3af;">Route: <span id="resRoute"
-                                style="color: white;"></span></p>
-                        <p class="small" style="color: #9ca3af;">Transit: <span id="resTransit"
-                                style="color: #3b82f6; font-weight: 500;"></span></p>
-                    </div>
-                </div>
-
-            </div> <!-- end dashboard-cards -->
+            </div>
 
             <!-- Recent Activity -->
             <div class="hero-card" style="margin-top: 2rem; max-width: 100%; width: 100%;">
@@ -193,7 +209,7 @@
                     <span class="small" style="font-weight: normal; color: #16a34a;">● Live System</span>
                 </h4>
                 <div style="overflow-x: auto; margin-top: 1rem;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: left;">
+                    <table class="admin-table" style="width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: left;">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--border); color: var(--muted);">
                                 <th style="padding: 10px;">ID</th>

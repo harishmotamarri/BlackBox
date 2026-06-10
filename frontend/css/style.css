@@ -840,7 +840,7 @@ textarea,
 }
 
 .hero h1 {
-  font-size: 4rem;
+  font-size: clamp(2.2rem, 6vw, 4rem); /* Responsive fluid typography */
   line-height: 1.1;
   font-weight: 800;
   margin: 0 0 24px 0;
@@ -1018,6 +1018,7 @@ textarea,
   border: 1px solid var(--border);
   border-radius: 8px;
   color: white;
+  font-size: 16px; /* Prevents auto-zoom on iOS */
 }
 
 .input-error {
@@ -1028,10 +1029,15 @@ textarea,
 
 /* Buttons */
 .btn {
-  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* Minimum mobile touch target */
+  padding: 10px 20px;
   border-radius: 999px;
   border: none;
   cursor: pointer;
+  font-size: 15px;
 }
 
 .btn-full {
@@ -1099,6 +1105,7 @@ textarea,
   }
 
   .hero-home .hero-inner {
+    grid-template-columns: 1fr;
     gap: 34px;
   }
 
@@ -1382,23 +1389,40 @@ textarea,
 
 @media (max-width: 1024px) {
   .assignment-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
-  /* Mobile: Order 1, 2, 3, 4 (Action last) */
+  .assignment-block {
+    padding: 14px;
+  }
+
   .assignment-action-area {
-    grid-column: 1;
-    order: 4;
     margin-top: 10px;
+    width: 100%;
+  }
+
+  .assignment-action-area .btn {
+    max-width: none !important;
   }
 }
 
-/* Desktop: Action in middle column */
+/* Desktop: Action centered at the bottom spanning all columns */
 .assignment-action-area {
-  grid-column: 2;
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 20px;
+}
+
+.assignment-action-area .btn {
+  max-width: 320px;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -1485,7 +1509,7 @@ textarea,
 
 .footer-links {
   flex: 1;
-  min-width: 320px;
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(130px, 1fr));
   gap: 26px;
@@ -1846,4 +1870,189 @@ textarea,
 
 .order-metadata-row strong {
   color: #fff;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVE NAVIGATION & LAYOUT OVERRIDES
+   ========================================== */
+
+/* Hamburger menu toggle button style */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 101;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: var(--text);
+  border-radius: 99px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover/active transitions */
+.nav-toggle.active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.nav-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle.active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* Modals sizing responsive safeguards */
+#totpSetupModal .modal-content,
+#adminTotpModal .modal-content {
+  width: min(400px, 92vw) !important;
+  max-width: 100% !important;
+}
+
+/* Custom Table Responsive Styles */
+@media (max-width: 768px) {
+  /* Hide normal header and convert cells to vertical cards */
+  .admin-table, 
+  .admin-table thead, 
+  .admin-table tbody, 
+  .admin-table th, 
+  .admin-table td, 
+  .admin-table tr {
+    display: block;
+  }
+
+  .admin-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .admin-table tr {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.01);
+  }
+
+  .admin-table td {
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    position: relative;
+    padding: 10px 0 10px 45% !important;
+    text-align: right;
+    min-height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .admin-table td:last-child {
+    border-bottom: none !important;
+  }
+
+  .admin-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--muted);
+    float: left;
+    text-align: left;
+  }
+
+  /* Support special cases */
+  .admin-table td[colspan] {
+    padding: 20px !important;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .admin-table td[colspan]::before {
+    display: none !important;
+  }
+
+  /* Mobile slide-out drawer style */
+  .nav-toggle {
+    display: flex;
+  }
+
+  .nav-menu {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: rgba(2, 6, 23, 0.98);
+    backdrop-filter: blur(12px);
+    border-left: 1px solid var(--border);
+    padding: 100px 24px 24px;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+
+  .nav-menu.active {
+    right: 0;
+  }
+
+  .nav-menu .dropdown {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-menu .dropdown-btn {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 44px;
+  }
+
+  .nav-menu .dropdown-content {
+    position: static;
+    width: 100%;
+    margin-top: 10px;
+    box-shadow: none;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    opacity: 1;
+    visibility: visible;
+    display: none;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .nav-menu .dropdown.active .dropdown-content {
+    display: block;
+  }
+
+  /* Admin Dashboard Layout fixes */
+  .admin-stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .admin-search {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
 }

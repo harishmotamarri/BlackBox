@@ -317,8 +317,8 @@ async function onCustomerSignIn(e) {
     }
     activeOrderIndex = 0;
 
-    localStorage.setItem('customer_mobile', customerMobile);
-    localStorage.setItem('customer_orders', JSON.stringify(customerOrders));
+    sessionStorage.setItem('customer_mobile', customerMobile);
+    sessionStorage.setItem('customer_orders', JSON.stringify(customerOrders));
 
     const portalTitle = $('portal-title');
     const portalDesc = $('portal-desc');
@@ -357,7 +357,7 @@ async function onCarouselUnlock(packetId) {
       
       // Update status locally
       order.status = 'UNLOCKED';
-      localStorage.setItem('customer_orders', JSON.stringify(customerOrders));
+      sessionStorage.setItem('customer_orders', JSON.stringify(customerOrders));
       renderCarousel();
     } else {
       setTotpStatus(res.message || 'Invalid or expired OTP', 'error');
@@ -384,8 +384,8 @@ function onCustomerSignOut() {
   customerOrders = [];
   activeOrderIndex = 0;
 
-  localStorage.removeItem('customer_mobile');
-  localStorage.removeItem('customer_orders');
+  sessionStorage.removeItem('customer_mobile');
+  sessionStorage.removeItem('customer_orders');
   sessionStorage.removeItem('lockit_auth_token');
 
   const portalTitle = $('portal-title');
@@ -403,8 +403,8 @@ function onCustomerSignOut() {
 
 // --- Load Session ---
 function loadCustomerSession() {
-  const savedMobile = localStorage.getItem('customer_mobile');
-  const savedOrders = localStorage.getItem('customer_orders');
+  const savedMobile = sessionStorage.getItem('customer_mobile');
+  const savedOrders = sessionStorage.getItem('customer_orders');
 
   const portalTitle = $('portal-title');
   const portalDesc = $('portal-desc');

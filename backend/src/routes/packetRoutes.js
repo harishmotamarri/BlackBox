@@ -591,14 +591,18 @@ router.post(
     // For each active packet, make sure it has a TOTP secret
     for (const packet of packets) {
       let secret = null;
+      let isPaired = packet.totpSecret === 'true';
+
       if (!packet.otphash) {
-        secret = generateSecret();
+        const { deriveSecretFromMobile } = require('../utils/totp');
+        secret = deriveSecretFromMobile(mobileNumber);
         const encryptedSecret = encryptSecret(secret);
 
         const { error: updateErr } = await supabase
           .from('packets')
           .update({
             otphash: encryptedSecret,
+            totpSecret: 'true',
             attempts: 0,
             status: 'LOCKED',
             current_otp: null
@@ -608,18 +612,30 @@ router.post(
         if (updateErr) {
           console.error(`Failed to auto-generate TOTP for packet ${packet.packetid}:`, updateErr);
           secret = null;
+        } else {
+          isPaired = true;
         }
       } else {
         try {
           secret = decryptSecret(packet.otphash);
+          if (!isPaired) {
+            // If it has otphash but is not marked paired, mark it paired
+            await supabase
+              .from('packets')
+              .update({ totpSecret: 'true' })
+              .eq('packetid', packet.packetid);
+            isPaired = true;
+          }
         } catch (e) {
           console.error(`Failed to decrypt secret for packet ${packet.packetid}. Regenerating new secret. Error:`, e.message);
-          secret = generateSecret();
+          const { deriveSecretFromMobile } = require('../utils/totp');
+          secret = deriveSecretFromMobile(mobileNumber);
           const encryptedSecret = encryptSecret(secret);
           const { error: updateErr } = await supabase
             .from('packets')
             .update({
               otphash: encryptedSecret,
+              totpSecret: 'true',
               attempts: 0,
               status: 'LOCKED',
               current_otp: null
@@ -627,6 +643,8 @@ router.post(
             .eq('packetid', packet.packetid);
           if (updateErr) {
             console.error(`Failed to update regenerated TOTP secret for packet ${packet.packetid}:`, updateErr);
+          } else {
+            isPaired = true;
           }
         }
       }
@@ -634,7 +652,7 @@ router.post(
       activeOrders.push({
         packetId: packet.packetid,
         secret: secret,
-        paired: packet.totpSecret === 'true',
+        paired: isPaired,
         status: packet.status,
         fromLocation: packet.from_location || '-',
         toLocation: packet.to_location || '-',

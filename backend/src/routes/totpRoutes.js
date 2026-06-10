@@ -15,7 +15,7 @@ router.get('/current', async (req, res) => {
 
     const { data: packet, error } = await supabase
       .from('packets')
-      .select('packetid, otphash, totpSecret')
+      .select('packetid, otphash, totpSecret, registered_number')
       .eq('packetid', packetId)
       .single();
 
@@ -25,7 +25,26 @@ router.get('/current', async (req, res) => {
 
     const currentUnixTime = Math.floor(Date.now() / 1000);
     const remainingSeconds = 30 - (currentUnixTime % 30);
-    const isPaired = packet.totpSecret === 'true';
+    
+    let secretKey;
+    let isPaired = packet.totpSecret === 'true';
+
+    if (!isPaired) {
+      const { deriveSecretFromMobile } = require('../utils/totp');
+      const mobile = packet.registered_number ? packet.registered_number.trim() : '';
+      if (mobile) {
+        secretKey = deriveSecretFromMobile(mobile);
+        const encryptedSecret = encryptSecret(secretKey);
+        await supabase
+          .from('packets')
+          .update({
+            otphash: encryptedSecret,
+            totpSecret: 'true'
+          })
+          .eq('packetid', packetId);
+        isPaired = true;
+      }
+    }
 
     if (!isPaired) {
       return res.json({
@@ -35,10 +54,10 @@ router.get('/current', async (req, res) => {
       });
     }
 
-    let secretKey;
     if (!packet.otphash) {
-      // Auto-generate, encrypt, and save if not exists
-      secretKey = generateSecret();
+      const { deriveSecretFromMobile } = require('../utils/totp');
+      const mobile = packet.registered_number ? packet.registered_number.trim() : '';
+      secretKey = mobile ? deriveSecretFromMobile(mobile) : generateSecret();
       const encryptedSecret = encryptSecret(secretKey);
       await supabase
         .from('packets')

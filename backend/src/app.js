@@ -5,6 +5,7 @@ const path = require('path');
 const packetRoutes = require('./routes/packetRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const hardwareRoutes = require('./routes/hardwareRoutes');
+const deviceRoutes = require('./routes/deviceRoutes');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandlers');
 
 function createApp() {
@@ -24,6 +25,7 @@ function createApp() {
   app.use('/api/admin', adminRoutes);
   app.use('/api/partner', require('./routes/partnerRoutes'));
   app.use('/api/hardware', hardwareRoutes);
+  app.use('/api/device', deviceRoutes);
   app.use('/api/totp', require('./routes/totpRoutes'));
 
   // Frontend (same origin avoids CORS pain)

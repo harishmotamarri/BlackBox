@@ -396,7 +396,10 @@
                         <h3>📦 Register New Packet</h3>
                         <input id="newPacketId" class="input-field" placeholder="Packet ID" />
                         <input id="registeredNumber" class="input-field" placeholder="A9G Number" />
-                        <input id="verificationCode" class="input-field" placeholder="Verification Code" />
+                        <div style="display: flex; align-items: center; gap: 8px; margin: 12px 0 6px;">
+                            <input type="checkbox" id="pairAuthenticator" style="width: auto; margin: 0; cursor: pointer;" />
+                            <label for="pairAuthenticator" style="font-size: 0.85rem; color: #94a3b8; cursor: pointer; margin: 0; user-select: none;">Pair Authenticator (to registered number)</label>
+                        </div>
                         <div id="regStatus" style="min-height: 20px; margin: 8px 0; font-size: 0.85rem; font-weight: 600;"></div>
                         <button id="registerBtn" class="admin-btn admin-btn-primary">Register Packet</button>
                     </div>
@@ -546,6 +549,27 @@
         </div>
     </div>
 
+    <div id="adminTotpModal" class="modal-overlay" style="display: none; z-index: 1000;">
+        <div class="modal-content" style="max-width: 400px; text-align: center; background: linear-gradient(155deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 14, 33, 0.98) 100%); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 20px; padding: 25px; color: #e2e8f0; position: relative;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">Authenticator Paired</h3>
+                <button id="closeAdminTotpModal" class="modal-close" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; transition: color 0.2s;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 10px 0;">
+                <p class="small" style="color: #94a3b8; margin-bottom: 18px; font-size: 0.88rem; line-height: 1.4;">Successfully paired authenticator for customer's mobile number. Scan QR code or copy secret key to pair manually.</p>
+                <div style="background: white; padding: 12px; border-radius: 12px; display: inline-block; margin-bottom: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+                    <img id="adminTotpQrCodeImg" src="" alt="QR Code" style="display: block; width: 180px; height: 180px;" />
+                </div>
+                <div style="margin-bottom: 18px; text-align: left;">
+                    <label class="small" style="display: block; color: #94a3b8; margin-bottom: 6px; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Secret Key</label>
+                    <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                        <code id="adminTotpSecretKey" style="flex: 1; font-family: monospace; font-size: 1.05rem; color: #38bdf8; letter-spacing: 0.05em; background: rgba(56, 189, 248, 0.1); padding: 8px 12px; border-radius: 8px; text-align: center; border: 1px solid rgba(56, 189, 248, 0.2); word-break: break-all;">--</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentCaptchaAnswer = null;
 
@@ -596,13 +620,13 @@
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const packetId = document.getElementById('newPacketId').value;
             const registeredNumber = document.getElementById('registeredNumber').value;
-            const verificationCode = document.getElementById('verificationCode').value;
+            const pairAuthenticator = document.getElementById('pairAuthenticator').checked;
 
             const statusEl = document.getElementById('regStatus');
             const btn = document.getElementById('registerBtn');
 
-            if (!packetId || !registeredNumber || !verificationCode) {
-                statusEl.innerText = 'Please enter Packet ID, Registered Number, and Verification Code';
+            if (!packetId || !registeredNumber) {
+                statusEl.innerText = 'Please enter Packet ID and Registered Number';
                 statusEl.style.color = '#ef4444';
                 return;
             }
@@ -618,7 +642,7 @@
                     body: JSON.stringify({
                         packetId,
                         registeredNumber,
-                        verificationCode
+                        pairAuthenticator
                     })
                 });
                 const data = await res.json();
@@ -628,7 +652,13 @@
                     statusEl.style.color = '#16a34a';
                     document.getElementById('newPacketId').value = '';
                     document.getElementById('registeredNumber').value = '';
-                    document.getElementById('verificationCode').value = '';
+                    document.getElementById('pairAuthenticator').checked = false;
+
+                    if (data.paired) {
+                        document.getElementById('adminTotpQrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.otpauthUrl)}`;
+                        document.getElementById('adminTotpSecretKey').innerText = data.secret;
+                        document.getElementById('adminTotpModal').style.display = 'flex';
+                    }
                 } else {
                     const msg = data.error || data.message || 'Registration failed';
                     if (msg.includes('already exists')) {
@@ -953,6 +983,9 @@
             if (!username) {
                 window.location.href = '/';
             }
+            document.getElementById('closeAdminTotpModal').addEventListener('click', () => {
+                document.getElementById('adminTotpModal').style.display = 'none';
+            });
         });
 
         window.turnOffSensorDetails = async function() {

@@ -222,9 +222,11 @@ function renderCarousel() {
             <div class="totp-progress-fill" id="carouselProgressFill-${idx}"></div>
           </div>
           <div class="totp-timer" id="carouselTimer-${idx}" style="margin-bottom: 15px;">Refresh in 30s</div>
+          ${order.paired ? '' : `
           <button class="btn btn-secondary btn-full" onclick="window.showTotpSetup('${escapeHtml(order.packetId)}')" type="button" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2); font-size: 0.85em; padding: 8px 16px; border-radius: 8px; width: 100%;">
             ${buttonText}
           </button>
+          `}
         </div>
       </div>
     `;

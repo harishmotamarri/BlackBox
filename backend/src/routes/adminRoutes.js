@@ -50,7 +50,7 @@ router.post(
 router.post(
     '/register-packet',
     asyncHandler(async (req, res) => {
-        const { packetId, registeredNumber, verificationCode } = req.body;
+        const { packetId, registeredNumber, pairAuthenticator } = req.body;
 
         if (!packetId || String(packetId).trim() === '') {
             const err = new Error('Packet ID required');
@@ -64,10 +64,14 @@ router.post(
             throw err;
         }
 
-        if (!verificationCode || String(verificationCode).trim() === '') {
-            const err = new Error('Verification Code required');
-            err.statusCode = 400;
-            throw err;
+        let otphashVal = null;
+        let totpSecretVal = null;
+
+        if (pairAuthenticator) {
+            const { deriveSecretFromMobile, encryptSecret } = require('../utils/totp');
+            const derivedSecret = deriveSecretFromMobile(registeredNumber.trim());
+            otphashVal = encryptSecret(derivedSecret);
+            totpSecretVal = 'true';
         }
 
         // Insert new packet
@@ -79,10 +83,12 @@ router.post(
                 status: 'LOCKED',
                 attempts: 0,
                 auth_type: '-',
-                current_otp: verificationCode.trim(), // Store verification code here
+                current_otp: null, // Removed verification code, defaults to null
                 // New Fields (set to defaults or null as they are not provided by Admin)
                 is_active: true,
-                in_transit: false
+                in_transit: false,
+                otphash: otphashVal,
+                totpSecret: totpSecretVal
             }]);
 
         if (error) {
@@ -97,7 +103,17 @@ router.post(
             throw err;
         }
 
-        res.json({ success: true, message: 'Packet registered successfully' });
+        let responseJson = { success: true, message: 'Packet registered successfully' };
+        if (pairAuthenticator) {
+            const { deriveSecretFromMobile } = require('../utils/totp');
+            const derivedSecret = deriveSecretFromMobile(registeredNumber.trim());
+            const otpauthUrl = `otpauth://totp/Lockit:${packetId.trim()}?secret=${derivedSecret}&issuer=Lockit`;
+            responseJson.paired = true;
+            responseJson.secret = derivedSecret;
+            responseJson.otpauthUrl = otpauthUrl;
+        }
+
+        res.json(responseJson);
     })
 );
 

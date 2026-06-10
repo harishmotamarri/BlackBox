@@ -150,11 +150,22 @@ function decryptSecret(encryptedData) {
   return decrypted;
 }
 
+/**
+ * Derive a deterministic Base32 secret from a mobile number
+ */
+function deriveSecretFromMobile(mobileNumber) {
+  const clean = String(mobileNumber).trim();
+  const hash = crypto.createHash('sha256').update(clean).digest();
+  return base32Encode(hash.slice(0, 20));
+}
+
 module.exports = {
   generateSecret,
   generateTOTP,
   verifyTOTP,
   encryptSecret,
   decryptSecret,
-  getEncryptionKey
+  getEncryptionKey,
+  deriveSecretFromMobile
 };
+

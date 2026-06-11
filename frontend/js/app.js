@@ -54,9 +54,7 @@ async function generateBrowserTOTP(secret) {
 // --- Customer Portal Variables & Session ---
 let customerMobile = null;
 let customerOrders = [];
-let activeOrderIndex = 0;
 let portalTimerInterval = null;
-let currentOtp = '000000';
 let remainingSeconds = 30;
 let isFetchingTotp = false;
 let currentPairingPacketId = null;
@@ -89,19 +87,33 @@ async function syncTotpFromServer() {
   if (isFetchingTotp) return;
   isFetchingTotp = true;
   try {
-    const order = customerOrders[activeOrderIndex];
-    if (!order) return;
+    if (customerOrders.length === 0) return;
 
-    const data = await api.getTotpCurrent(order.packetId);
-    if (data.paired) {
-      currentOtp = data.otp;
-      order.paired = true;
-    } else {
-      currentOtp = 'Not Paired';
-      order.paired = false;
+    // Fetch TOTPs for all packets concurrently
+    const promises = customerOrders.map(async (order) => {
+      try {
+        const data = await api.getTotpCurrent(order.packetId);
+        if (data.paired) {
+          order.otp = data.otp;
+          order.paired = true;
+        } else {
+          order.otp = 'Not Paired';
+          order.paired = false;
+        }
+        return data.remainingSeconds;
+      } catch (err) {
+        console.error(`Failed to sync TOTP for packet ${order.packetId}:`, err);
+        order.otp = 'Not Paired';
+        order.paired = false;
+        return 30;
+      }
+    });
+
+    const results = await Promise.all(promises);
+    if (results.length > 0) {
+      remainingSeconds = results[0];
     }
-    remainingSeconds = data.remainingSeconds;
-    updateCarouselDisplay();
+    updateListDisplay();
   } catch (err) {
     console.error('Failed to sync TOTP from server:', err);
   } finally {
@@ -109,53 +121,71 @@ async function syncTotpFromServer() {
   }
 }
 
-function updateCarouselDisplay() {
+function updateListDisplay() {
   if (customerOrders.length === 0) return;
-  
-  const order = customerOrders[activeOrderIndex];
-  const isCodePaired = order && order.paired;
 
-  let formattedCode = '--- ---';
-  if (isCodePaired && currentOtp && currentOtp !== 'Not Paired') {
-    formattedCode = `${currentOtp.slice(0, 3)} ${currentOtp.slice(3)}`;
-  } else if (currentOtp === 'Not Paired') {
-    formattedCode = 'Loading...';
-  }
-
-  const codeEl = $(`carouselTotpCode-${activeOrderIndex}`);
-  if (codeEl) {
-    codeEl.innerText = formattedCode;
-    if (!isCodePaired) {
-      codeEl.style.color = '#64748b';
-      codeEl.style.fontSize = '2.2rem';
+  customerOrders.forEach((order, idx) => {
+    const isCodePaired = order.paired;
+    let formattedCode = '--- ---';
+    
+    if (isCodePaired && order.otp && order.otp !== 'Not Paired' && order.otp !== 'Error') {
+      formattedCode = `${order.otp.slice(0, 3)} ${order.otp.slice(3)}`;
+    } else if (order.otp === 'Not Paired') {
+      formattedCode = 'Not Paired';
     } else {
-      codeEl.style.color = '#38bdf8';
-      codeEl.style.fontSize = '3.5rem';
+      formattedCode = 'Loading...';
     }
-  }
 
-  const timerEl = $(`carouselTimer-${activeOrderIndex}`);
-  if (timerEl) {
-    timerEl.innerText = isCodePaired ? `Refresh in ${remainingSeconds}s` : 'Loading...';
-  }
-
-  const progressFill = $(`carouselProgressFill-${activeOrderIndex}`);
-  if (progressFill) {
-    const pct = isCodePaired ? (remainingSeconds / 30) * 100 : 0;
-    progressFill.style.width = `${pct}%`;
-
-    if (remainingSeconds <= 5 && isCodePaired) {
-      progressFill.classList.add('warning');
-    } else {
-      progressFill.classList.remove('warning');
+    const codeEl = $(`totpCode-${idx}`);
+    if (codeEl) {
+      codeEl.innerText = formattedCode;
+      if (!isCodePaired) {
+        codeEl.classList.add('unpaired');
+      } else {
+        codeEl.classList.remove('unpaired');
+      }
     }
-  }
+
+    const timerContainer = $(`totpTimerContainer-${idx}`);
+    if (timerContainer) {
+      if (isCodePaired) {
+        timerContainer.classList.remove('hidden');
+      } else {
+        timerContainer.classList.add('hidden');
+      }
+    }
+
+    const circleFill = $(`totpCircleFill-${idx}`);
+    if (circleFill) {
+      // Circumference of R=12 circle is 2 * Math.PI * 12 = 75.398
+      const circumference = 75.4;
+      const pct = remainingSeconds / 30;
+      const offset = (1 - pct) * circumference;
+      circleFill.style.strokeDashoffset = offset;
+
+      if (remainingSeconds <= 5) {
+        circleFill.classList.add('warning');
+      } else {
+        circleFill.classList.remove('warning');
+      }
+    }
+
+    const timerText = $(`totpTimerText-${idx}`);
+    if (timerText) {
+      timerText.innerText = `${remainingSeconds}s`;
+      if (remainingSeconds <= 5) {
+        timerText.style.color = '#ef4444';
+      } else {
+        timerText.style.color = 'var(--muted)';
+      }
+    }
+  });
 }
 
-// --- Carousel Countdown Loop ---
+// --- Countdown Loop ---
 function startPortalTimer() {
   if (portalTimerInterval) {
-    updateCarouselDisplay();
+    updateListDisplay();
     return;
   }
 
@@ -167,7 +197,7 @@ function startPortalTimer() {
     if (remainingSeconds <= 0) {
       await syncTotpFromServer();
     } else {
-      updateCarouselDisplay();
+      updateListDisplay();
     }
   }
 
@@ -178,69 +208,64 @@ function startPortalTimer() {
   });
 }
 
-// --- Render Carousel Slides ---
+// --- Render Scrollable TOTP List ---
 function renderCarousel() {
-  const container = $('carousel-slides-container');
-  const indicator = $('carouselIndicator');
-  const prevBtn = $('carouselPrevBtn');
-  const nextBtn = $('carouselNextBtn');
-  
+  const container = $('totp-list-container');
   if (!container) return;
 
   if (customerOrders.length === 0) {
     container.innerHTML = `
-      <div class="carousel-slide active">
-        <p style="text-align: center; color: var(--muted); margin: 20px 0;">No active orders found.</p>
+      <div style="text-align: center; color: var(--muted); padding: 30px 0;">
+        <p style="margin: 0; font-size: 0.95rem;">No active orders found.</p>
       </div>
     `;
-    if (indicator) indicator.innerText = 'Order 0 of 0';
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
     return;
   }
 
-  // Update navigation buttons & indicators
-  if (prevBtn) prevBtn.disabled = activeOrderIndex === 0;
-  if (nextBtn) nextBtn.disabled = activeOrderIndex === customerOrders.length - 1;
-  if (indicator) indicator.innerText = `Order ${activeOrderIndex + 1} of ${customerOrders.length}`;
-
-  // Render slides
   container.innerHTML = customerOrders.map((order, idx) => {
-    const isActiveClass = idx === activeOrderIndex ? 'active' : '';
+    const isCodePaired = order.paired;
+    
+    // Status badge classes
+    let statusClass = 'status-badge-locked';
+    if (order.status === 'UNLOCKED') statusClass = 'status-badge-unlocked';
+    if (order.status === 'TAMPERED') statusClass = 'status-badge-tampered';
+    if (order.status === 'VERIFIED') statusClass = 'status-badge-verified';
+
+    // Route info
+    const routeInfo = (order.fromLocation && order.toLocation && order.fromLocation !== '-' && order.toLocation !== '-')
+      ? `${escapeHtml(order.fromLocation)} → ${escapeHtml(order.toLocation)}`
+      : 'In Warehouse';
+
     return `
-      <div class="carousel-slide ${isActiveClass}" data-index="${idx}">
-        <div class="totp-display-container">
-          <div class="order-metadata-card" style="margin-bottom: 15px; border-color: rgba(56, 189, 248, 0.25); background: rgba(56, 189, 248, 0.03); text-align: left;">
-            <div class="order-metadata-row" style="margin-bottom: 0;">
-              <span>Packet ID:</span>
-              <strong>${escapeHtml(order.packetId)}</strong>
-            </div>
+      <div class="totp-item-card" data-index="${idx}">
+        <div class="totp-item-header">
+          <div class="totp-item-meta">
+            <span class="totp-item-packet-id">Packet: ${escapeHtml(order.packetId)}</span>
+            <span class="totp-item-route">${routeInfo}</span>
           </div>
-          <div class="totp-code" id="carouselTotpCode-${idx}">000 000</div>
-          <div class="totp-progress-bar">
-            <div class="totp-progress-fill" id="carouselProgressFill-${idx}"></div>
+          <span class="status-badge ${statusClass}">${escapeHtml(order.status)}</span>
+        </div>
+        <div class="totp-item-body">
+          <div class="totp-item-code-container">
+            <div class="totp-code totp-item-code" id="totpCode-${idx}" style="margin-bottom: 0;">Loading...</div>
           </div>
-          <div class="totp-timer" id="carouselTimer-${idx}" style="margin-bottom: 15px;">Refresh in 30s</div>
+          <div class="totp-timer-container" id="totpTimerContainer-${idx}">
+            ${!isCodePaired ? `
+              <button class="btn btn-primary" onclick="window.showTotpSetup('${escapeHtml(order.packetId)}')" style="min-height: 32px; padding: 4px 14px; font-size: 0.82rem; border-radius: 8px;">
+                Pair Device
+              </button>
+            ` : `
+              <svg class="totp-circle-svg" width="28" height="28" viewBox="0 0 28 28">
+                <circle class="totp-circle-bg" cx="14" cy="14" r="12" />
+                <circle class="totp-circle-fill" id="totpCircleFill-${idx}" cx="14" cy="14" r="12" stroke-dasharray="75.4" stroke-dashoffset="0" transform="rotate(-90 14 14)" />
+              </svg>
+              <span class="totp-timer-text" id="totpTimerText-${idx}">30s</span>
+            `}
+          </div>
         </div>
       </div>
     `;
   }).join('');
-}
-
-function showPrevOrder() {
-  if (activeOrderIndex > 0) {
-    activeOrderIndex--;
-    renderCarousel();
-    startPortalTimer();
-  }
-}
-
-function showNextOrder() {
-  if (activeOrderIndex < customerOrders.length - 1) {
-    activeOrderIndex++;
-    renderCarousel();
-    startPortalTimer();
-  }
 }
 
 // --- Customer Sign Up ---
@@ -315,7 +340,6 @@ async function onCustomerSignIn(e) {
     if (!Array.isArray(customerOrders)) {
       customerOrders = [];
     }
-    activeOrderIndex = 0;
 
     sessionStorage.setItem('customer_mobile', customerMobile);
     sessionStorage.setItem('customer_orders', JSON.stringify(customerOrders));
@@ -346,11 +370,11 @@ async function onCustomerSignIn(e) {
 async function onCarouselUnlock(packetId) {
   clearTotpStatus();
   const order = customerOrders.find(o => o.packetId === packetId);
-  if (!order) return;
+  if (!order || !order.otp) return;
 
   try {
     setTotpStatus(`Verifying TOTP token for ${packetId}...`, 'info');
-    const res = await api.unlock(packetId, currentOtp);
+    const res = await api.unlock(packetId, order.otp);
 
     if (res.success) {
       setTotpStatus(`Lockit ${packetId} successfully unlocked!`, 'success');
@@ -382,7 +406,6 @@ function onCustomerSignOut() {
 
   customerMobile = null;
   customerOrders = [];
-  activeOrderIndex = 0;
 
   sessionStorage.removeItem('customer_mobile');
   sessionStorage.removeItem('customer_orders');
@@ -421,7 +444,6 @@ function loadCustomerSession() {
     } catch {
       customerOrders = [];
     }
-    activeOrderIndex = 0;
 
     if (portalTitle) portalTitle.innerText = 'Your Active Orders';
     if (portalDesc) portalDesc.innerText = 'Generate security tokens and unlock your high-value packets.';
@@ -613,13 +635,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const signupForm = $('signupForm');
   if (signupForm) signupForm.onsubmit = onCustomerSignUp;
-
-  // Carousel controls
-  const prevBtn = $('carouselPrevBtn');
-  if (prevBtn) prevBtn.onclick = showPrevOrder;
-
-  const nextBtn = $('carouselNextBtn');
-  if (nextBtn) nextBtn.onclick = showNextOrder;
 
   const signOutBtn = $('portalSignOutBtn');
   if (signOutBtn) signOutBtn.onclick = onCustomerSignOut;

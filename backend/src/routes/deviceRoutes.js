@@ -18,7 +18,7 @@ async function defensiveUpdatePackets(packetId, updateData) {
     
     while (attempts < maxAttempts) {
         if (Object.keys(dataCopy).length === 0) {
-            return { success: true, message: 'No valid columns left to update' };
+            return { success: true, message: 'No valid columns left to update.' };
         }
 
         const { error } = await supabase
